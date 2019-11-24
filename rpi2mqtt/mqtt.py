@@ -20,5 +20,4 @@ def publish(topic, payload, cnt=1):
 def subscribe(topic, callback):
     mqtt_sub.callback(callback, topic, hostname=config.mqtt.host, port=config.mqtt.port,
                       auth={'username': config.mqtt.username, 'password': config.mqtt.password},
-                      tls={'ca_certs': config.mqtt.ca_cert},
-                      retain=True)
+                      tls={'ca_certs': config.mqtt.ca_cert})
