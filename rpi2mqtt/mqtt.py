@@ -9,7 +9,8 @@ def publish(topic, payload, cnt=1):
         if cnt <= config.mqtt.retries:
             mqtt.single(topic, payload, hostname=config.mqtt.host, port=config.mqtt.port,
                         auth={'username': config.mqtt.username, 'password': config.mqtt.password},
-                        tls={'ca_certs': config.mqtt.ca_cert})
+                        tls={'ca_certs': config.mqtt.ca_cert},
+                        retain=True)
     except:
         traceback.print_exc()
         cnt += 1
@@ -18,5 +19,6 @@ def publish(topic, payload, cnt=1):
 
 def subscribe(topic, callback):
     mqtt_sub.callback(callback, topic, hostname=config.mqtt.host, port=config.mqtt.port,
-                        auth={'username': config.mqtt.username, 'password': config.mqtt.password},
-                        tls={'ca_certs': config.mqtt.ca_cert})
+                      auth={'username': config.mqtt.username, 'password': config.mqtt.password},
+                      tls={'ca_certs': config.mqtt.ca_cert},
+                      retain=True)
