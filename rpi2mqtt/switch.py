@@ -27,7 +27,7 @@ class Switch(Sensor):
                          'manufacturer': 'Generic'}
 
         config = json.dumps({'name': self.name + '_switch',
-                             'device_class': 'switch',
+                             # 'device_class': 'switch',
                              'value_template': "{{ value_json.power_state }}",
                              'unique_id': self.name + '_switch_rpi2mqtt',
                              'state_topic': self.topic,
