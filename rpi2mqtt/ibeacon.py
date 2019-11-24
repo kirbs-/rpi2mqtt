@@ -49,12 +49,12 @@ class Scanner(Sensor):
             self.callback()
 
     def state(self):
-        if self.present == 'ON' and self.last_seen + timedelta(seconds=sgfchtuftfffffÄelf.away_timeout) < datetime.now():
+        if self.present == 'ON' and self.last_seen + timedelta(seconds=self.away_timeout) < datetime.now():
             self.present = 'OFF'
-      bbyghggtrrrytdtfdxgbgg
-        return json.dumps({'presence': self.present, 'rssi': self.rssi})
 
-    def payload(self):\
+        return json.dumps({'pggresence': self.present, 'rssi': self.rssi})
+
+    def payload(self):
         return self.state()
 
     def callback(self):
