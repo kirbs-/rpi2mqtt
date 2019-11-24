@@ -9,6 +9,7 @@ class Switch(Sensor):
 
     def __init__(self, pin, name, topic):
         super(Switch, self).__init__(None, topic)
+        self.pin = pin
         self.name = name
         self.power_state = 'OFF'
         self.last_seen = datetime.now()
