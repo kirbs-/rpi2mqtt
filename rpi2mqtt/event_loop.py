@@ -26,6 +26,10 @@ def main():
     scanner = BeaconScanner(sensor_list[1].process_ble_update)
     scanner.start()
 
+    # start MQTT client
+    mc = mqtt.MqttClient()
+    mc.setup()
+
     try:
         while True:
 
@@ -36,6 +40,7 @@ def main():
 
     except:
         scanner.stop()
+        mc.client.loop_stop()
 
 
 if __name__ == '__main__':
