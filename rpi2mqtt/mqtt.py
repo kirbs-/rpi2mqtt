@@ -35,7 +35,7 @@ class MqttClient(object):
         if config.mqtt.username or config.mqtt.password:
             self.client.username_pw_set(config.mqtt.username, config.mqtt.password)
 
-        print("Connecting to " + args.host + " port: " + str(port))
+        print("Connecting to " + config.mqtt.host + " port: " + str(config.mqtt.port))
         self.client.connect(config.mqtt.host, config.mqtt.port, 60)
         # mqttc.subscribe(args.topic, args.qos)
 
