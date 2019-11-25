@@ -12,6 +12,10 @@ import traceback
 
 
 def main():
+    # start MQTT client
+    mc = mqtt.MqttClient()
+    mc.setup()
+
     sensor_list = []
 
     for sensor in config.sensors:
@@ -26,10 +30,6 @@ def main():
 
     scanner = BeaconScanner(sensor_list[1].process_ble_update)
     scanner.start()
-
-    # start MQTT client
-    mc = mqtt.MqttClient()
-    mc.setup()
 
     try:
         while True:
