@@ -39,10 +39,14 @@ class MqttClient(object):
 
         self.client.loop_start()
 
-    # def on_message(self, client, topic, message):
-    #     pass
-    #
-    # def on_subscribe(self):
+        self.client.on_subscribe = self.on_subscribe
+        self.client.on_message = self.on_message
+
+    def on_message(selfm, mqttc, obj, msg):
+        print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
+
+    def on_subscribe(self, mqttc, obj, mid, granted_qos):
+        print("Subscribed: " + str(mid) + " " + str(granted_qos))
 
     def subscribe(self, topic, callback):
         self.client.subscribe(topic)
