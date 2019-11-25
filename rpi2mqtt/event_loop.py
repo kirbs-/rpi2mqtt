@@ -35,7 +35,7 @@ def main():
         while True:
 
             for sensor in sensor_list:
-                if sensor.type == 'switch':
+                if type(sensor) == Switch:
                     sensor.callback('a', 'b', {'payload': 'n/a'})
                 else:
                     sensor.callback()
