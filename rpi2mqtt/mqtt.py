@@ -27,7 +27,7 @@ class MqttClient(object):
         self.subscribed_topics = {}
 
     def setup(self):
-        self.client.set_tls(ca_certs=config.mqtt.ca_cert) #, certfile=None, keyfile=None, cert_reqs=cert_required, tls_version=tlsVersion)
+        self.client.tls_set(ca_certs=config.mqtt.ca_cert) #, certfile=None, keyfile=None, cert_reqs=cert_required, tls_version=tlsVersion)
 
         # if args.insecure:
         #     self.client.tls_insecure_set(True)
