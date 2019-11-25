@@ -64,10 +64,13 @@ class Switch(Sensor):
         return self.state()
 
     def callback(self, client, userdata, message):
-        payload = json.loads(message.payload)
-        if payload.state == 'ON':
-            self.on()
-        elif payload.state == 'OFF':
-            self.off()
+        try:
+            payload = json.loads(message.payload)
+            if payload.state == 'ON':
+                self.on()
+            elif payload.state == 'OFF':
+                self.off()
+        except:
+            print('error with MQTT message')
 
         mqtt.publish(self.topic, self.payload())
