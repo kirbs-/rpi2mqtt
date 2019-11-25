@@ -8,6 +8,7 @@ from rpi2mqtt.switch import Switch
 import time
 import rpi2mqtt.mqtt as mqtt
 from beacontools import BeaconScanner, IBeaconFilter
+import traceback
 
 
 def main():
@@ -39,6 +40,7 @@ def main():
             time.sleep(300)
 
     except:
+        traceback.print_exc()
         scanner.stop()
         mc.client.loop_stop()
 
