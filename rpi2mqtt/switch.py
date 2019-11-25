@@ -41,7 +41,7 @@ class Switch(Sensor):
         g.setmode(g.BCM)
         g.setup(self.pin, g.OUT)
 
-        mqtt.subscribe(self.topic + '/set', self.callback)
+        mqtt.MqttClient().subscribe(self.topic + '/set', self.callback)
 
     def on(self):
         g.output(self.pin, g.HIGH)

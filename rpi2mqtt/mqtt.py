@@ -19,8 +19,10 @@ def publish(topic, payload, cnt=1):
 
 
 class MqttClient(object):
+    __shared_state = {}
 
     def __init__(self):
+        self.__dict__ = self.__shared_state
         self.client = Client('rpi2mqtt')
         self.subscribed_topics = {}
 
