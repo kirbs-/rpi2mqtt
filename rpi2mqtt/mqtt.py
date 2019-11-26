@@ -58,6 +58,7 @@ def on_subscribe(mqttc, obj, mid, granted_qos):
 
 
 def subscribe(topic, callback):
+    print("Subsribed topic %s", topic)
     client.subscribe(topic)
     client.message_callback_add(topic, callback)
     # mqtt_sub.callback(callback, topic, hostname=config.mqtt.host, port=config.mqtt.port,

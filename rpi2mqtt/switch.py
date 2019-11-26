@@ -65,10 +65,10 @@ class Switch(Sensor):
 
     def callback(self, client, userdata, message):
         try:
-            # payload = json.loads(message.payload)
-            if message == 'ON':
+            payload = message.payload
+            if payload == 'ON':
                 self.on()
-            elif message == 'OFF':
+            elif payload == 'OFF':
                 self.off()
         except:
             print('error with MQTT message')
