@@ -40,8 +40,8 @@ class Switch(Sensor):
         # setup GPIO
         g.setmode(g.BCM)
         g.setup(self.pin, g.OUT)
-
-        mqtt.MqttClient().subscribe(self.topic + '/set', self.callback)
+        print('Switch client: %s', mqtt.client)
+        mqtt.subscribe(self.topic + '/set', self.callback)
 
     def on(self):
         g.output(self.pin, g.HIGH)
@@ -65,10 +65,10 @@ class Switch(Sensor):
 
     def callback(self, client, userdata, message):
         try:
-            payload = json.loads(message.payload)
-            if payload.state == 'ON':
+            # payload = json.loads(message.payload)
+            if message == 'ON':
                 self.on()
-            elif payload.state == 'OFF':
+            elif message == 'OFF':
                 self.off()
         except:
             print('error with MQTT message')

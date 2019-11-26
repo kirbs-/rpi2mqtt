@@ -13,8 +13,8 @@ import traceback
 
 def main():
     # start MQTT client
-    mc = mqtt.MqttClient()
-    mc.setup()
+    mqtt.setup()
+    print('Event loop client: %s', mqtt.client)
 
     sensor_list = []
 
