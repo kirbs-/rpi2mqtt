@@ -30,7 +30,7 @@ def publish(topic, payload, cnt=1):
         # self.client = Client('rpi2mqtt')
     # subscribed_topics = {}
 
-def setup(self):
+def setup():
     client.tls_set(ca_certs=config.mqtt.ca_cert) #, certfile=None, keyfile=None, cert_reqs=cert_required, tls_version=tlsVersion)
 
     # if args.insecure:
@@ -48,11 +48,14 @@ def setup(self):
     client.on_subscribe = on_subscribe
     client.on_message = on_message
 
+
 def on_message(mqttc, obj, msg):
     print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
 
+
 def on_subscribe(mqttc, obj, mid, granted_qos):
     print("Subscribed: " + str(mid) + " " + str(granted_qos))
+
 
 def subscribe(topic, callback):
     client.subscribe(topic)
