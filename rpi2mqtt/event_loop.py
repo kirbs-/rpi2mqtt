@@ -45,7 +45,7 @@ def main():
     except:
         traceback.print_exc()
         scanner.stop()
-        mc.client.loop_stop()
+        mqtt.client.loop_stop()
 
 
 if __name__ == '__main__':
