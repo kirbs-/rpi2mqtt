@@ -41,7 +41,7 @@ class Switch(Sensor):
         g.setmode(g.BCM)
         g.setup(self.pin, g.OUT)
         print('Switch client: %s', mqtt.client)
-        mqtt.subscribe(self.topic + '/set', self.callback)
+        mqtt.subscribe(self.topic + '/set', self.mqtt_callback)
 
     def on(self):
         g.output(self.pin, g.HIGH)
@@ -58,13 +58,29 @@ class Switch(Sensor):
             self.on()
 
     def state(self):
-        return json.dumps({'power_state': self.power_state})
+        # read output pin state
+        pin_state = g.input(self.pin)
+
+        # convert to home assistant on/off state defaults
+        # https://www.home-assistant.io/integrations/switch.mqtt/#state_on
+        if pin_state == 1:
+            self.power_state = 'ON'
+        elif pin_state == 0:
+            self.power_state = 'OFF'
+        else:
+            self.power_state = 'INVALID'
+
+        return self.power_state
 
     def payload(self):
-        return self.state()
+        return json.dumps({'power_state': self.state()})
 
-    def callback(self, client, userdata, message):
+    def callback(self, *args):
+        mqtt.publish(self.topic, self.payload())
+
+    def mqtt_callback(self, client, userdata, message):
         try:
+            print(message)
             payload = message.payload
             if payload == 'ON':
                 self.on()
