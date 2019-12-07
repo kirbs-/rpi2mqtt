@@ -20,9 +20,9 @@ class DHT(object):
         #print temperature
 
         if scale == 'F':
-            return json.dumps({'humidity': self.humidity, 'temperature': self.temperature_F})
+            return json.dumps({'humidity': self._humidity, 'temperature': self.temperature_F})
         else:
-            return json.dumps({'humidity': self.humidity, 'temperature': self.temperature})
+            return json.dumps({'humidity': self._humidity, 'temperature': self.temperature})
 
     @property
     def temperature_F(self):
