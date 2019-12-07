@@ -15,7 +15,7 @@ class DHT(object):
         self.setup()
 
     def read(self, scale='F'):
-        self.humidity, self.temperature = dht.read(22, self.pin)
+        self.humidity, self.temperature = dht.read_retry(22, self.pin)
         #print humidity
         #print temperature
 
@@ -27,13 +27,17 @@ class DHT(object):
     @property
     def temperature_F(self):
         try:
-            return self.temperature_C * 1.8 + 32.0
+            return round(self.temperature_C * 1.8 + 32.0, 1)
         except:
-            return -1.0
+            return None
 
     @property
     def temperature_C(self):
-        return self.temperature
+        return round(self.temperature, 1)
+
+    @property
+    def _humidity(self):
+        return round(self.humidity, 3)
 
     def setup(self):
         # config = json.dumps({'name': self.name, 'device_class': self.device_class})
