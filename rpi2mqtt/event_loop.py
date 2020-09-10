@@ -25,6 +25,8 @@ def main():
             s = Scanner(sensor.name, sensor.topic, sensor.uuid, sensor.away_timeout)
         elif sensor.type == 'switch':
             s = Switch(sensor.pin, sensor.name, sensor.topic)
+        elif sensor.type == 'reed':
+            s = ReedSwitch(sensor.pin, sensor.topic, sensor.name, sensor.normally_open)
 
         sensor_list.append(s)
 
