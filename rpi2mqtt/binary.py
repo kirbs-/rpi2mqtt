@@ -19,7 +19,6 @@ class ReedSwitch(Sensor):
         super(ReedSwitch, self).__init__(pin, topic)
         self.normally_open = normally_open
         self.name = name
-        GPIO.setmode(GPIO.BCM)
         self.setup()
 
     def setup(self):
@@ -27,6 +26,27 @@ class ReedSwitch(Sensor):
         Setup GPIO pin to read input value.
         :return: None
         """
+        device_config = {'name': "Reed Switch",
+                         'identifiers': self.name,
+                         'sw_version': 'rpi2mqtt',
+                         'model': "Reed Switch",
+                         'manufacturer': 'Generic'}
+
+        config = json.dumps({'name': self.name + '_switch',
+                             # 'device_class': 'switch',
+                             'value_template': "{{ value_json.state }}",
+                             'unique_id': self.name + '_reed_switch_rpi2mqtt',
+                             'state_topic': self.topic,
+                             "json_attributes_topic": self.topic + '/state',
+                             "command_topic": self.topic + '/set',
+                             'device': device_config})
+
+        mqtt.publish('homeassistant/switch/{}_{}/config'.format(self.name, 'switch'), config)
+
+        g.setmode(g.BCM)
+        # g.setup(self.pin, g.OUT)
+        # mqtt.subscribe(self.topic + '/set', self.mqtt_callback)
+
         if self.normally_open:
             mode = GPIO.PUD_UP
         else:
@@ -41,8 +61,8 @@ class ReedSwitch(Sensor):
             return "ON"
 
     def payload(self):
-        # return json.dumps({'state': self.state()})
-        return self.state()
+        return json.dumps({'state': self.state()})
+        # return self.state()
 
     def callback(self, pin):
         mqtt.publish(self.topic, self.payload())
