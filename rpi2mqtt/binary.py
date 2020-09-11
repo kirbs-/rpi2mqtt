@@ -67,5 +67,5 @@ class ReedSwitch(Sensor):
         return json.dumps({'state': self.state()})
         # return self.state()
 
-    def callback(self, pin):
+    def callback(self, *args):
         mqtt.publish(self.topic, self.payload())
