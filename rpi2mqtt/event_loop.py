@@ -1,6 +1,5 @@
 # import asyncio
 from rpi2mqtt.config import config
-import RPi.GPIO as GPIO
 from rpi2mqtt.binary import *
 from rpi2mqtt.temperature import *
 from rpi2mqtt.ibeacon import Scanner
@@ -18,7 +17,6 @@ logging.basicConfig(level=logging.INFO)
 def main():
     # start MQTT client
     mqtt.setup()
-    print('Event loop client: %s', mqtt.client)
 
     sensor_list = []
 

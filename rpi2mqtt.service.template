@@ -1,5 +1,5 @@
 [Unit]
-Description=RPi2mqtt Service
+Description=rpi2mqtt Service
 After=network-online.target
 
 [Service]

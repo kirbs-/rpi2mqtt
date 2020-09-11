@@ -52,7 +52,7 @@ class Scanner(Sensor):
         if self.present == 'ON' and self.last_seen + timedelta(seconds=self.away_timeout) < datetime.now():
             self.present = 'OFF'
 
-        return json.dumps({'pggresence': self.present, 'rssi': self.rssi})
+        return json.dumps({'presence': self.present, 'rssi': self.rssi})
 
     def payload(self):
         return self.state()

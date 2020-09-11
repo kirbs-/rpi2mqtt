@@ -45,7 +45,7 @@ class ReedSwitch(Sensor):
                              'device': device_config})
 
         mqtt.publish('homeassistant/sensor/{}_{}/config'.format(self.name, 'reed_switch'), config)
-        logging.info("Published MQTT discovery config to homeassistant/sensor/{}_{}/config".format(self.name, 'reed_switch'))
+        logging.debug("Published MQTT discovery config to homeassistant/sensor/{}_{}/config".format(self.name, 'reed_switch'))
         GPIO.setmode(GPIO.BCM)
         # g.setup(self.pin, g.OUT)
         # mqtt.subscribe(self.topic + '/set', self.mqtt_callback)
@@ -56,9 +56,12 @@ class ReedSwitch(Sensor):
             mode = GPIO.PUD_DOWN
 
         GPIO.setup(self.pin, GPIO.IN, pull_up_down=mode)
+        logging.debug(f'Reed Switch {self.name} configured as input on GPIO{self.pin} witn pull_up_down set to {mode}')
 
     def state(self):
-        if GPIO.input(self.pin) == 1:
+        state = GPIO.input(self.pin) 
+        logging.debug(f"Reed Switch {self.name}: GPIO{self.pin} state is {state}")
+        if state == 1:
             return "OFF"
         else:
             return "ON"

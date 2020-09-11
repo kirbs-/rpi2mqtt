@@ -16,6 +16,7 @@ install: $(service_dir) rpi2mqtt.service
 
 uninstall:
 	-systemctl stop rpi2mqtt
+	-systemctl disable rpi2mqtt
 	-rm -r $(service_dir)/rpi2mqtt.service
 
 clean:
