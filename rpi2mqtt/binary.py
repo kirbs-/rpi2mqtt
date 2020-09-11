@@ -46,7 +46,7 @@ class ReedSwitch(Sensor):
 
         mqtt.publish('homeassistant/sensor/{}_{}/config'.format(self.name, 'reed_switch'), config)
         logging.info("Published MQTT discovery config to homeassistant/sensor/{}_{}/config".format(self.name, 'reed_switch'))
-        GPIO.setmode(g.BCM)
+        GPIO.setmode(GPIO.BCM)
         # g.setup(self.pin, g.OUT)
         # mqtt.subscribe(self.topic + '/set', self.mqtt_callback)
 
