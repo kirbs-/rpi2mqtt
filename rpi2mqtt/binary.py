@@ -1,6 +1,9 @@
 import RPi.GPIO as GPIO
 import rpi2mqtt.mqtt as mqtt
 import json
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 
 class Sensor(object):
@@ -32,7 +35,7 @@ class ReedSwitch(Sensor):
                          'model': "Reed Switch",
                          'manufacturer': 'Generic'}
 
-        config = json.dumps({'name': self.name + '_switch',
+        config = json.dumps({'name': self.name + '_reed_switch',
                              # 'device_class': 'switch',
                              'value_template': "{{ value_json.state }}",
                              'unique_id': self.name + '_reed_switch_rpi2mqtt',
@@ -41,9 +44,9 @@ class ReedSwitch(Sensor):
                              "command_topic": self.topic + '/set',
                              'device': device_config})
 
-        mqtt.publish('homeassistant/switch/{}_{}/config'.format(self.name, 'switch'), config)
-
-        g.setmode(g.BCM)
+        mqtt.publish('homeassistant/sensor/{}_{}/config'.format(self.name, 'reed_switch'), config)
+        logging.info("Published MQTT discovery config to {}".format(self.top))
+        GPIO.setmode(g.BCM)
         # g.setup(self.pin, g.OUT)
         # mqtt.subscribe(self.topic + '/set', self.mqtt_callback)
 
