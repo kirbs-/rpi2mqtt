@@ -38,7 +38,7 @@ def main():
         scanner = BeaconScanner(sensor_list[1].process_ble_update)
         scanner.start()
     except:
-        logging.error()
+        logging.error("Beacon scanner did not start")
 
     try:
         while True:
