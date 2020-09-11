@@ -55,7 +55,7 @@ class ReedSwitch(Sensor):
         else:
             mode = GPIO.PUD_DOWN
 
-        GPIO.input(self.pin, GPIO.IN, pull_up_down=mode)
+        GPIO.setup(self.pin, GPIO.IN, pull_up_down=mode)
 
     def state(self):
         if GPIO.input(self.pin) == 1:
