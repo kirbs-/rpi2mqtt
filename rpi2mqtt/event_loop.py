@@ -9,6 +9,10 @@ import time
 import rpi2mqtt.mqtt as mqtt
 from beacontools import BeaconScanner, IBeaconFilter
 import traceback
+import logging
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 def main():
@@ -30,8 +34,11 @@ def main():
 
         sensor_list.append(s)
 
-    scanner = BeaconScanner(sensor_list[1].process_ble_update)
-    scanner.start()
+    try:
+        scanner = BeaconScanner(sensor_list[1].process_ble_update)
+        scanner.start()
+    except:
+        logging.error()
 
     try:
         while True:
