@@ -41,7 +41,7 @@ class ReedSwitch(Sensor):
                              'unique_id': self.name + '_reed_switch_rpi2mqtt',
                              'state_topic': self.topic,
                              "json_attributes_topic": self.topic + '/state',
-                             "command_topic": self.topic + '/set',
+                            #  "command_topic": self.topic + '/set',
                              'device': device_config})
 
         mqtt.publish('homeassistant/sensor/{}_{}/config'.format(self.name, 'reed_switch'), config)
