@@ -7,4 +7,5 @@ import pathlib
 
 with open(os.path.join(os.path.dirname(__file__), 'config.yaml'), 'r') as f:
     config = DotMap(yaml.safe_load(f))
-    logging.info(f"Loaded config file {pathlib.Path(f.name).absolute()}")
+    config_filename = pathlib.Path(f.name).absolute()
+    logging.info(f"Loaded config file {config_filename}")
