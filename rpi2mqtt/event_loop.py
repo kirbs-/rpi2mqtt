@@ -28,7 +28,7 @@ def main():
         elif sensor.type == 'switch':
             s = Switch(sensor.pin, sensor.name, sensor.topic)
         elif sensor.type == 'reed':
-            s = ReedSwitch(sensor.pin, sensor.topic, sensor.name, sensor.normally_open)
+            s = ReedSwitch(sensor.pin, sensor.topic, sensor.name, sensor.normally_open, sensor.get('device_type'))
 
         sensor_list.append(s)
 

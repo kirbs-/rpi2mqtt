@@ -18,10 +18,11 @@ class ReedSwitch(Sensor):
     Extends simple binary sensor by adding configuration for normally open or normally closed reed switches.
     """
 
-    def __init__(self, pin, topic, name, normally_open):
+    def __init__(self, pin, topic, name, normally_open, device_class=None):
         super(ReedSwitch, self).__init__(pin, topic)
         self.normally_open = normally_open
         self.name = name
+        self.device_class = device_class
         self.setup()
 
     def setup(self):
@@ -36,7 +37,7 @@ class ReedSwitch(Sensor):
                          'manufacturer': 'Generic'}
 
         config = json.dumps({'name': self.name + '_reed_switch',
-                             # 'device_class': 'switch',
+                             'device_class': self.device_class,
                              'value_template': "{{ value_json.state }}",
                              'unique_id': self.name + '_reed_switch_rpi2mqtt',
                              'state_topic': self.topic,
@@ -44,7 +45,7 @@ class ReedSwitch(Sensor):
                             #  "command_topic": self.topic + '/set',
                              'device': device_config})
 
-        mqtt.publish('homeassistant/sensor/{}_{}/config'.format(self.name, 'reed_switch'), config)
+        mqtt.publish('homeassistant/binary_sensor/{}_{}/config'.format(self.name, 'reed_switch'), config)
         logging.debug("Published MQTT discovery config to homeassistant/sensor/{}_{}/config".format(self.name, 'reed_switch'))
         GPIO.setmode(GPIO.BCM)
         # g.setup(self.pin, g.OUT)
@@ -62,9 +63,9 @@ class ReedSwitch(Sensor):
         state = GPIO.input(self.pin) 
         logging.debug(f"Reed Switch {self.name}: GPIO{self.pin} state is {state}")
         if state == 1:
-            return "OFF"
-        else:
             return "ON"
+        else:
+            return "OFF"
 
     def payload(self):
         return json.dumps({'state': self.state()})
