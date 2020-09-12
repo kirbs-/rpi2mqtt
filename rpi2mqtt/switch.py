@@ -40,7 +40,6 @@ class Switch(Sensor):
         # setup GPIO
         g.setmode(g.BCM)
         g.setup(self.pin, g.OUT)
-        print('Switch client: %s', mqtt.client)
         mqtt.subscribe(self.topic + '/set', self.mqtt_callback)
 
     def on(self):

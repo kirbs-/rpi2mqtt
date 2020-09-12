@@ -57,11 +57,11 @@ class ReedSwitch(Sensor):
             mode = GPIO.PUD_DOWN
 
         GPIO.setup(self.pin, GPIO.IN, pull_up_down=mode)
-        logging.debug(f'Reed Switch {self.name} configured as input on GPIO{self.pin} witn pull_up_down set to {mode}')
+        logging.debug('Reed Switch {} configured as input on GPIO{} witn pull_up_down set to {}'.format(self.name, self.pin, mode))
 
     def state(self):
         state = GPIO.input(self.pin) 
-        logging.debug(f"Reed Switch {self.name}: GPIO{self.pin} state is {state}")
+        logging.debug("Reed Switch {}: GPIO{} state is {}".format(self.name, self.pin, state))
         if state == 1:
             return "ON"
         else:

@@ -36,7 +36,7 @@ def setup():
 
     logging.info("Connecting to " + config.mqtt.host + " port: " + str(config.mqtt.port))
     client.connect(config.mqtt.host, config.mqtt.port, 60)
-    logging.info(f"Successfully connected to {config.mqtt.host} port: {str(config.mqtt.port)}")
+    logging.info("Successfully connected to {} port: {}".format(config.mqtt.host, str(config.mqtt.port)))
 
     client.loop_start()
 
