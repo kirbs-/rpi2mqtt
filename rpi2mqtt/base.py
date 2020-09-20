@@ -58,3 +58,41 @@ class Sensor(object):
 
     def callback(self, *args):
         mqtt.publish(self.topic, self.payload())
+
+
+class SensorGroup(Sensor):
+    """Group of multiple sensors e.g. DHT22 or BME280.
+
+    Sensors with multiple capabilities (i.e. temperature, humididty, pressure, presenece, etc.) must be setup as
+    individual sesnsors in home assistant. Updating the state however, is done with a single message to the sensor's
+    state topic.
+
+    Attributes:
+        name (str): Sensor name
+        pin (int): Sensor GPIO pin (BCM pin nanme)
+        topic (str): Base topic name. This is prepended to '/state' and '/config' to create respective topics in HA.
+        device_class (str): Home Assistant device class for this sensor.
+        device_type (str): Type of sensor. e.g. DHT22, Reed Switch, etc. 
+    """
+    def __init__(self, name, pin, topic, device_class, device_type):
+        self.name = name
+        self.pin = pin
+        self.topic = topic
+        self.device_class = device_class
+        self.device_type = device_type
+        self.sensors = []
+
+    def setup(self):
+        for sensor in self.sensors:
+            sensor.setup()
+
+    # def state(self):
+    #     raise NotImplementedError('State method is required.')
+
+    # def payload(self): 
+    #     raise NotImplementedError('Payload method is required.')
+
+    # def callback(self):
+    #     raise NotImplementedError('Callback method is required.')
+
+

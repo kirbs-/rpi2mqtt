@@ -2,6 +2,11 @@
 import Adafruit_DHT as dht
 import json
 import rpi2mqtt.mqtt as mqtt
+from rpi2mqtt.base import Sensor, SensorGroup
+import logging
+
+import smbus2
+import bme280
 
 
 class DHT(object):
@@ -80,3 +85,63 @@ class DHT(object):
 
     def callback(self):
         mqtt.publish(self.topic, self.payload())
+
+
+class GenericTemperature(Sensor):
+    @property
+    def homeassistant_mqtt_config(self):
+        config = super(GenericTemperature, self).homeassistant_mqtt_config
+        config['value_template'] = "{{ value_json.temperature }}"
+        return config
+
+
+class GenericHumidity(Sensor):
+    @property
+    def homeassistant_mqtt_config(self):
+        config = super(GenericHumidity, self).homeassistant_mqtt_config
+        config['value_template'] = "{{ value_json.humidity }}"
+        return config
+
+
+class GenericPressure(Sensor):
+    @property
+    def homeassistant_mqtt_config(self):
+        config = super(GenericPressure, self).homeassistant_mqtt_config
+        config['value_template'] = "{{ value_json.pressure }}"
+        return config
+
+
+class BME280(SensorGroup):
+
+    def __init__(self, name, topic, **kwargs):
+
+        self.port = 1
+        self.address = 0x76
+        self.bus = smbus2.SMBus(port)
+        self.calibration_params = bme280.load_calibration_params(bus, address)
+        self.device_type = 'BME280'
+
+        # the sample method will take a single reading and return a
+        # compensated_reading object
+        # data = bme280.sample(bus, address, calibration_params)
+
+        # TODO sensors with multiple reading types can be supported with publishing one message
+        # but each reading type must be setup seperately with different names and value_json attributes.
+
+    
+    def setup_temperature(self):
+        sensor = GenericTemperature(self.name, None, self.topic, 'temperature', self.device_type)
+        self.sensors.append(sensor)
+
+    def setup_humidity(self):
+        sensor = GenericHumidity(self.name, None, self.topic, 'humidity', self.device_type)
+        self.sensors.append(sensor)
+
+    def setupPressure(self):
+        sensor = GenericPressure(self.name, None, self.topic, 'pressure', self.device_type)
+        self.sensors.append(sensor)
+
+    def state(self):
+        return bme280.sample(bus, address, calibration_params)
+
+    # def payload(self)

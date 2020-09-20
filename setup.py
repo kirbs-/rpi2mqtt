@@ -55,7 +55,7 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='raspberrypi mqtt GPIO',
+    keywords='raspberrypi mqtt GPIO home automation',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
@@ -66,7 +66,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['dotmap', 'pyyaml', 'paho-mqtt', 'Adafruit_DHT'],
+    install_requires=['dotmap', 'pyyaml', 'paho-mqtt', 'Adafruit_DHT', 'RPi.bme280', 'pathlib', 'smbus2'],
 
     entry_points={
         'console_scripts': ['rpi2mqtt=rpi2mqtt.event_loop:main']
