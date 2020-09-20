@@ -12,6 +12,7 @@ subscribed_topics = {}
 
 def publish(topic, payload, cnt=1):
     try:
+        logging.debug("Pushlishing to topic {}: | attempt: {} | message: {}".format(topic, cnt, payload))
         if cnt <= config.mqtt.retries:
             mqtt.single(topic, payload, 
                         hostname=config.mqtt.host, 
@@ -19,8 +20,8 @@ def publish(topic, payload, cnt=1):
                         auth={'username': config.mqtt.username, 'password': config.mqtt.password},
                         tls={'ca_certs': config.mqtt.ca_cert},
                         retain=True)
-    except:
-        traceback.print_exc()
+    except Exception as e:
+        logging.exception("Error publishing message.", e)
         cnt += 1
         publish(topic, payload, cnt)
 
@@ -49,7 +50,7 @@ def on_message(mqttc, obj, msg):
 
 
 def on_subscribe(mqttc, obj, mid, granted_qos):
-    logging.info("Subscribed: " + str(mid) + " " + str(granted_qos))
+    logging.info("Subscribed to " + str(mid) + " " + str(granted_qos))
 
 
 def subscribe(topic, callback):
