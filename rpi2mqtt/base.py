@@ -19,26 +19,33 @@ class Sensor(object):
     @property
     def device_config(self):
         return {'name': self.name,
-                         'identifiers': self.name,
-                         'sw_version': 'rpi2mqtt {}'.format(__version__),
-                         'model': self.device_model,
-                         'manufacturer': 'Generic'}
+                'identifiers': self.name,
+                'sw_version': 'rpi2mqtt {}'.format(__version__),
+                'model': self.device_model,
+                'manufacturer': 'Generic'}
 
     @property
     def homeassistant_mqtt_config(self):
-        return json.dumps({'name': self.name + '_' + self.device_model,
-                             'device_class': self.device_class,
-                             'value_template': "{{ value_json.state }}",
-                             'unique_id': self.name + '_' + self.device_model + '_rpi2mqtt',
-                             'state_topic': self.topic,
-                             "json_attributes_topic": self.topic + '/state',
-                             'device': self.device_config})
+        return {'name': self.name + '_' + self.device_model,
+                'device_class': self.device_class,
+                'value_template': "{{ value_json.state }}",
+                'unique_id': self.name + '_' + self.device_model + '_rpi2mqtt',
+                'state_topic': self.topic,
+                "json_attributes_topic": self.topic + '/state',
+                'device': self.device_config}
+
+    @property
+    def homeassistant_mqtt_config_json(self):
+        return json.dumps(self.homeassistant_mqtt_config)
+
+    @property
+    def homeassistant_mqtt_config_topic(self):
+        return 'homeassistant/{}/{}_{}/config'.format(self.device_class, self.name, self.device_model)
 
     def publish_mqtt_discovery(self):
 
-        mqtt.publish('homeassistant/{}/{}_{}/config'.format(self.device_class, self.name, self.device_model), self.homeassistant_mqtt_config)
-        logging.debug("Published MQTT discovery config to homeassistant/{}/{}_{}/config".format(
-            self.device_class, self.name, self.device_model))
+        mqtt.publish(self.homeassistant_mqtt_config_topic, self.homeassistant_mqtt_config_json)
+        logging.debug("Published MQTT discovery config to {}".format(self.homeassistant_mqtt_config_topic))
 
     def setup(self):
         raise NotImplementedError("Setup method is required.")

@@ -22,6 +22,10 @@ class Scanner(Sensor):
         # config['command_topic'] = self.topic + '/set'
         return config
 
+    @property
+    def homeassistant_mqtt_config_topic(self):
+        return 'homeassistant/binary_sensor/{}_{}/config'.format(self.name, self.device_class)
+
     def setup(self):
         """
         Setup Home Assistant MQTT discover for ibeacons.
@@ -41,7 +45,7 @@ class Scanner(Sensor):
         #                      "json_attributes_topic": self.topic,
         #                      'device': device_config})
 
-        mqtt.publish('homeassistant/binary_sensor/{}_{}/config'.format(self.name, 'presence'), config)
+        # mqtt.publish('homeassistant/binary_sensor/{}_{}/config'.format(self.name, 'presence'), config)
 
     def process_ble_update(self, bt_addr, rssi, packet, additional_info):
         new_state = self.present
