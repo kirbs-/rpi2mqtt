@@ -26,9 +26,9 @@ def main():
         elif sensor.type == 'ibeacon':
             s = Scanner(sensor.name, sensor.topic, sensor.uuid, sensor.away_timeout)
         elif sensor.type == 'switch':
-            s = Switch(sensor.pin, sensor.name, sensor.topic)
+            s = Switch(sensor.name, sensor.pin, sensor.topic)
         elif sensor.type == 'reed':
-            s = ReedSwitch(sensor.pin, sensor.topic, sensor.name, sensor.normally_open, sensor.get('device_type'))
+            s = ReedSwitch(sensor.name, sensor.pin, sensor.topic, sensor.normally_open, sensor.get('device_type'))
 
         sensor_list.append(s)
 
