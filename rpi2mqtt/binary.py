@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO
+from rpi2mqtt.base import Sensor
 import rpi2mqtt.mqtt as mqtt
 import json
 import logging
