@@ -20,7 +20,7 @@ class ReedSwitch(Sensor):
     """
 
     def __init__(self, name, pin, topic, normally_open, device_class=None):
-        super(ReedSwitch, self).__init__(name, pin, topic, device_class)
+        super(ReedSwitch, self).__init__(name, pin, topic, device_class, 'reed_switch')
         self.normally_open = normally_open
         self.setup()
 

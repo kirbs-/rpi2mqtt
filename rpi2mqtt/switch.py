@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 class Switch(Sensor):
 
     def __init__(self, name, pin, topic):
-        super(Switch, self).__init__(None, name, pin, topic)
+        super(Switch, self).__init__(None, name, pin, topic, switch, 'generic_switch')
         self.power_state = 'OFF'
         self.last_seen = datetime.now()
         self.setup()
