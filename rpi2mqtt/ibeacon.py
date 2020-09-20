@@ -1,4 +1,4 @@
-from rpi2mqtt.binary import Sensor
+from rpi2mqtt.base import Sensor
 import rpi2mqtt.mqtt as mqtt
 import json
 from datetime import datetime, timedelta
@@ -7,8 +7,7 @@ from datetime import datetime, timedelta
 class Scanner(Sensor):
 
     def __init__(self, name, topic, beacon_uuid, away_timeout=10):
-        super(Scanner, self).__init__(None, topic)
-        self.name = name
+        super(Scanner, self).__init__(None, name, None, topic, 'presence', 'ibeacon')
         self.present = 'OFF'
         self.rssi = None
         self.beacon_uuid = beacon_uuid
@@ -16,24 +15,31 @@ class Scanner(Sensor):
         self.last_seen = datetime.now()
         self.setup()
 
+    @property
+    def homeassistant_mqtt_config(self):
+        config = super(Scanner, self).homeassistant_mqtt_config
+        config['value_template'] = "{{ value_json.presence }}"
+        # config['command_topic'] = self.topic + '/set'
+        return config
+
     def setup(self):
         """
         Setup Home Assistant MQTT discover for ibeacons.
         :return: None
         """
-        device_config = {'name': "iBeacon",
-                         'identifiers': self.name,
-                         'sw_version': 'rpi2mqtt',
-                         'model': "iBeacon",
-                         'manufacturer': 'Generic'}
+        # device_config = {'name': "iBeacon",
+        #                  'identifiers': self.name,
+        #                  'sw_version': 'rpi2mqtt',
+        #                  'model': "iBeacon",
+        #                  'manufacturer': 'Generic'}
 
-        config = json.dumps({'name': self.name + '_ibeacon',
-                             'device_class': 'presence',
-                             'value_template': "{{ value_json.presence }}",
-                             'unique_id': self.name + '_ibeacon_rpi2mqtt',
-                             'state_topic': self.topic,
-                             "json_attributes_topic": self.topic,
-                             'device': device_config})
+        # config = json.dumps({'name': self.name + '_ibeacon',
+        #                      'device_class': 'presence',
+        #                      'value_template': "{{ value_json.presence }}",
+        #                      'unique_id': self.name + '_ibeacon_rpi2mqtt',
+        #                      'state_topic': self.topic,
+        #                      "json_attributes_topic": self.topic,
+        #                      'device': device_config})
 
         mqtt.publish('homeassistant/binary_sensor/{}_{}/config'.format(self.name, 'presence'), config)
 
@@ -52,10 +58,10 @@ class Scanner(Sensor):
         if self.present == 'ON' and self.last_seen + timedelta(seconds=self.away_timeout) < datetime.now():
             self.present = 'OFF'
 
-        return json.dumps({'presence': self.present, 'rssi': self.rssi})
+        return self.present
 
     def payload(self):
-        return self.state()
+        return json.dumps({'presence': self.present, 'rssi': self.rssi})
 
-    def callback(self):
-        mqtt.publish(self.topic, self.payload())
+    # def callback(self):
+    #     mqtt.publish(self.topic, self.payload())
