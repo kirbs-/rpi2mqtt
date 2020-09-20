@@ -6,11 +6,11 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 
-class Sensor(object):
+# class Sensor(object):
 
-    def __init__(self, pin, topic):
-        self.pin = pin
-        self.topic = topic
+#     def __init__(self, pin, topic):
+#         self.pin = pin
+#         self.topic = topic
 
 
 class ReedSwitch(Sensor):
@@ -18,11 +18,9 @@ class ReedSwitch(Sensor):
     Extends simple binary sensor by adding configuration for normally open or normally closed reed switches.
     """
 
-    def __init__(self, pin, topic, name, normally_open, device_class=None):
-        super(ReedSwitch, self).__init__(pin, topic)
+    def __init__(self, name, pin, topic, normally_open, device_class=None):
+        super(ReedSwitch, self).__init__(name, pin, topic, device_class)
         self.normally_open = normally_open
-        self.name = name
-        self.device_class = device_class
         self.setup()
 
     def setup(self):
@@ -30,23 +28,23 @@ class ReedSwitch(Sensor):
         Setup GPIO pin to read input value.
         :return: None
         """
-        device_config = {'name': "Reed Switch",
-                         'identifiers': self.name,
-                         'sw_version': 'rpi2mqtt',
-                         'model': "Reed Switch",
-                         'manufacturer': 'Generic'}
+        # device_config = {'name': self.name,
+        #                  'identifiers': self.name,
+        #                  'sw_version': 'rpi2mqtt',
+        #                  'model': self.device_model,
+        #                  'manufacturer': 'Generic'}
 
-        config = json.dumps({'name': self.name + '_reed_switch',
-                             'device_class': self.device_class,
-                             'value_template': "{{ value_json.state }}",
-                             'unique_id': self.name + '_reed_switch_rpi2mqtt',
-                             'state_topic': self.topic,
-                             "json_attributes_topic": self.topic + '/state',
-                            #  "command_topic": self.topic + '/set',
-                             'device': device_config})
+        # config = json.dumps({'name': self.name + '_' + self.device_model,
+        #                      'device_class': self.device_class,
+        #                      'value_template': "{{ value_json.state }}",
+        #                      'unique_id': self.name + '_' + self.device_model + '_rpi2mqtt',
+        #                      'state_topic': self.topic,
+        #                      "json_attributes_topic": self.topic + '/state',
+        #                     #  "command_topic": self.topic + '/set',
+        #                      'device': device_config})
 
-        mqtt.publish('homeassistant/binary_sensor/{}_{}/config'.format(self.name, 'reed_switch'), config)
-        logging.debug("Published MQTT discovery config to homeassistant/sensor/{}_{}/config".format(self.name, 'reed_switch'))
+        # mqtt.publish('homeassistant/{}/{}_{}/config'.format(self.device_class, self.name, self.device_model), config)
+        # logging.debug("Published MQTT discovery config to homeassistant/{}/{}_{}/config.format(self.device_class, self.name, self.device_model)")
         GPIO.setmode(GPIO.BCM)
         # g.setup(self.pin, g.OUT)
         # mqtt.subscribe(self.topic + '/set', self.mqtt_callback)
@@ -69,7 +67,6 @@ class ReedSwitch(Sensor):
 
     def payload(self):
         return json.dumps({'state': self.state()})
-        # return self.state()
 
     def callback(self, *args):
         mqtt.publish(self.topic, self.payload())
