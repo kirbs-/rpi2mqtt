@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 class Scanner(Sensor):
 
     def __init__(self, name, topic, beacon_uuid, away_timeout=10):
-        super(Scanner, self).__init__(None, name, None, topic, 'presence', 'ibeacon')
+        super(Scanner, self).__init__(name, None, topic, 'presence', 'ibeacon')
         self.present = 'OFF'
         self.rssi = None
         self.beacon_uuid = beacon_uuid
