@@ -13,7 +13,7 @@ class Sensor(object):
         self.pin = pin
         self.topic = topic
         self.device_class = device_class
-        self.device_model
+        self.device_model = device_model
         self.publish_mqtt_discovery()
 
     @property
