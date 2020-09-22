@@ -94,6 +94,11 @@ class GenericTemperature(Sensor):
         config['value_template'] = "{{ value_json.temperature }}"
         return config
 
+    def setup(self):
+        pass
+
+    def state(self):
+        pass
 
 class GenericHumidity(Sensor):
     @property
@@ -102,6 +107,11 @@ class GenericHumidity(Sensor):
         config['value_template'] = "{{ value_json.humidity }}"
         return config
 
+    def setup(self):
+        pass
+
+    def state(self):
+        pass
 
 class GenericPressure(Sensor):
     @property
@@ -110,6 +120,11 @@ class GenericPressure(Sensor):
         config['value_template'] = "{{ value_json.pressure }}"
         return config
 
+    def setup(self):
+        pass
+
+    def state(self):
+        pass
 
 class BME280(SensorGroup):
 
