@@ -143,7 +143,13 @@ class BME280(SensorGroup):
         self.sensors.append(sensor)
 
     def state(self):
-        return bme280.sample(self.bus, self.address, self.calibration_params)
+        data = bme280.sample(self.bus, self.address, self.calibration_params)
+        return {'id': data.id,
+            'timestamp': data.timestamp,
+            'temperature': data.temperature,
+            'pressure': data.pressure,
+            'humidity': data.humidity,
+            }
 
     def payload(self):
         return json.dumps(self.state())
