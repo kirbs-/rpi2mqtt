@@ -114,7 +114,7 @@ class GenericPressure(Sensor):
 class BME280(SensorGroup):
 
     def __init__(self, name, topic, **kwargs):
-        super(BME280, self).__init__(name, none, topic, 'temperature/humidity/pressure', 'BME280'. **kwargs)
+        super(BME280, self).__init__(name, None, topic, 'temperature/humidity/pressure', 'BME280', **kwargs)
         self.port = 1
         self.address = 0x76
         self.bus = smbus2.SMBus(self.port)
