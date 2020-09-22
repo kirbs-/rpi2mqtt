@@ -144,7 +144,7 @@ class BME280(SensorGroup):
 
     def state(self):
         data = bme280.sample(self.bus, self.address, self.calibration_params)
-        return {'id': data.id,
+        return {'id': str(data.id),
             'timestamp': data.timestamp,
             'temperature': data.temperature,
             'pressure': data.pressure,
