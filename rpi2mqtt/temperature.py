@@ -2,7 +2,7 @@
 import Adafruit_DHT as dht
 import json
 import rpi2mqtt.mqtt as mqtt
-from rpi2mqtt.base import Sensor, SensorGroup
+from rpi2mqtt.base import Sensor, SensorGroup, sensor
 import logging
 
 import smbus2
@@ -121,6 +121,10 @@ class BME280(SensorGroup):
         self.calibration_params = bme280.load_calibration_params(self.bus, self.address)
         self.topic = topic
         self.device_type = 'BME280'
+        self.setup_temperature()
+        self.setup_humidity()
+        self.setup_pressure()
+
 
         # the sample method will take a single reading and return a
         # compensated_reading object
@@ -128,17 +132,19 @@ class BME280(SensorGroup):
 
         # TODO sensors with multiple reading types can be supported with publishing one message
         # but each reading type must be setup seperately with different names and value_json attributes.
-
     
+    # @sensor
     def setup_temperature(self):
         sensor = GenericTemperature(self.name, None, self.topic, 'temperature', self.device_type)
         self.sensors.append(sensor)
-
+    
+    # @sensor
     def setup_humidity(self):
         sensor = GenericHumidity(self.name, None, self.topic, 'humidity', self.device_type)
         self.sensors.append(sensor)
 
-    def setupPressure(self):
+    # @sensor
+    def setup_pressure(self):
         sensor = GenericPressure(self.name, None, self.topic, 'pressure', self.device_type)
         self.sensors.append(sensor)
 
