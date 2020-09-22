@@ -9,9 +9,10 @@ import rpi2mqtt.mqtt as mqtt
 from beacontools import BeaconScanner, IBeaconFilter
 import traceback
 import logging
+import sys
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 
 def main():

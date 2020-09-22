@@ -144,4 +144,5 @@ class BME280(SensorGroup):
     def state(self):
         return bme280.sample(bus, address, calibration_params)
 
-    # def payload(self)
+    def payload(self):
+        return json.dumps(self.state())
