@@ -3,7 +3,17 @@ import json
 import logging
 from rpi2mqtt.version import __version__
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
+
+
+SENSORS = {}
+def sensor(func):
+    def wrap(*args):
+        if args.name not in SENSORS:
+            SENSORS[args.name] = [func]
+        else:
+            SENSORS[args.name].append(func)
+    return wrap
 
 
 class Sensor(object):
