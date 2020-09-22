@@ -4,7 +4,7 @@ import rpi2mqtt.mqtt as mqtt
 import json
 import logging
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 
 # class Sensor(object):

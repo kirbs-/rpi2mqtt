@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import RPi.GPIO as g
 import logging
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 class Switch(Sensor):
 
