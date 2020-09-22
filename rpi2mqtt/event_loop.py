@@ -30,8 +30,12 @@ def main():
             s = Switch(sensor.name, sensor.pin, sensor.topic)
         elif sensor.type == 'reed':
             s = ReedSwitch(sensor.name, sensor.pin, sensor.topic, sensor.normally_open, sensor.get('device_type'))
-
-        sensor_list.append(s)
+        elif sensor.type == 'bme280':
+            s = BME280(sensor.name, sensor.topic)
+        else:
+            logging.warn('Sensor {} found in config, but not setup.'.format(sensor.name))
+        if s:
+            sensor_list.append(s)
 
     try:
         scanner = BeaconScanner(sensor_list[1].process_ble_update)

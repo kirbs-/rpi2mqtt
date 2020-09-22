@@ -66,7 +66,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['dotmap', 'pyyaml', 'paho-mqtt', 'Adafruit_DHT', 'RPi.bme280', 'pathlib', 'smbus2'],
+    install_requires=['dotmap', 'pyyaml', 'paho-mqtt', 'Adafruit_DHT', 'RPi.bme280', 'pathlib', 'smbus2', 'beacontools', 'RPi.GPIO'],
 
     entry_points={
         'console_scripts': ['rpi2mqtt=rpi2mqtt.event_loop:main']
