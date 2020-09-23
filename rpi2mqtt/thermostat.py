@@ -1,4 +1,5 @@
 from rpi2mqtt.switch import Switch
+from rpi2mqtt.base import Sensor
 from rpi2mqtt.temperature import BME280
 import RPi.GPIO as GPIO
 
@@ -53,6 +54,6 @@ class HestiaPi(Sensor):
 
     def state(self):
         data = self.bse280.state()
-        
+
 
     
