@@ -41,7 +41,7 @@ class Sensor(object):
         return {'name': '{}_{}'.format(self.name, self.device_model),
                 'device_class': self.device_class,
                 'value_template': "{{ value_json.state }}",
-                'unique_id': '{}_{}_rpi2mqtt'.format(self.name, self.device_model),
+                'unique_id': '{}_{}_{}_rpi2mqtt'.format(self.name, self.device_model, self.device_class),
                 'state_topic': self.topic,
                 "json_attributes_topic": '{}/state'.format(self.topic),
                 'device': self.device_config}
