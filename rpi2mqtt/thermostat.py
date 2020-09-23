@@ -25,6 +25,7 @@ class HestiaPi(Sensor):
 
     def __init__(self, name, topic):
         # self.modes = HVAC.HEAT_PUMP_MODES
+        super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
         self.mode = 'off'
         self.active_mode = 'off'
         self.set_point_cool = 75
@@ -33,14 +34,14 @@ class HestiaPi(Sensor):
         self.min_run_time = 15
         # how soon can HVAC be activated again after stopping
         self.min_trigger_cooldown_time = 15
-        self.bme280
+        self.bme280 = None
         self.modes = {}
 
     def setup(self):
         self.bme280 = BME280(self.name, self.topic)
 
         for mode, pins in HVAC.HEAT_PUMP_MODES.items():
-            switch = Switch('{}_{}'.format(self.name, mode), pins, self.topic)
+            switch = Switch('{}_{}'.format(self.name, mode), pins, '{}_{}'.format(self.topic, mode))
             switch.setup()
             self.modes[mode] = switch
 
@@ -53,7 +54,7 @@ class HestiaPi(Sensor):
             raise IllegalArgumentError("Fan state '{}' is not a valid state.".format(state))
 
     def state(self):
-        data = self.bse280.state()
+        data = self.bme280.state()
 
 
     

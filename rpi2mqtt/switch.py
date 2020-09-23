@@ -21,6 +21,7 @@ class Switch(Sensor):
         config = super(Switch, self).homeassistant_mqtt_config
         config['value_template'] = "{{ value_json.power_state }}"
         config['command_topic'] = self.topic + '/set'
+        del config['device_class']
         return config
 
     def setup(self):
@@ -49,7 +50,7 @@ class Switch(Sensor):
         g.setmode(g.BCM)
         if not type(self.pin) == list:
             self.pin = list(self.pin)
-        for pin in self.pin_assignment:
+        for pin in self.pin:
             g.setup(pin, g.OUT)
         mqtt.subscribe(self.homeassistant_mqtt_config['command_topic'], self.mqtt_callback)
 

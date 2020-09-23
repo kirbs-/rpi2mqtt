@@ -55,6 +55,8 @@ class Sensor(object):
         homeassistant_sensor_type = 'sensor'
         if self.device_class in Sensor.BINARY_SENSORS:
             homeassistant_sensor_type = 'binary_sensor'
+        elif self.device_class == 'switch':
+            homeassistant_sensor_type = 'switch'
 
         return 'homeassistant/{}/{}_{}/config'.format(homeassistant_sensor_type, self.name, self.device_class)
 
