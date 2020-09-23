@@ -106,6 +106,7 @@ class GenericHumidity(Sensor):
     def homeassistant_mqtt_config(self):
         config = super(GenericHumidity, self).homeassistant_mqtt_config
         config['value_template'] = "{{ value_json.humidity }}"
+        config['unit_of_measurement'] = '%'
         return config
 
     def setup(self):
