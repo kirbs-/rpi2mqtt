@@ -47,7 +47,10 @@ class Switch(Sensor):
 
         # setup GPIO
         g.setmode(g.BCM)
-        g.setup(self.pin, g.OUT)
+        if not type(self.pin) == list:
+            self.pin = list(self.pin)
+        for pin in self.pin_assignment:
+            g.setup(pin, g.OUT)
         mqtt.subscribe(self.homeassistant_mqtt_config['command_topic'], self.mqtt_callback)
 
     def on(self):
