@@ -136,7 +136,7 @@ class BME280(SensorGroup):
         self.calibration_params = bme280.load_calibration_params(self.bus, self.address)
         self.topic = topic
         self.device_type = 'BME280'
-        self.setup_temperature()
+        # self.setup_temperature()
         self.setup_humidity()
         self.setup_pressure()
 
