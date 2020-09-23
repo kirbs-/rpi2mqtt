@@ -92,6 +92,7 @@ class GenericTemperature(Sensor):
     def homeassistant_mqtt_config(self):
         config = super(GenericTemperature, self).homeassistant_mqtt_config
         config['value_template'] = "{{ value_json.temperature }}"
+        config['unit_of_measurement'] = '°C'
         return config
 
     def setup(self):
