@@ -9,8 +9,8 @@ import logging
 
 class Switch(Sensor):
 
-    def __init__(self, name, pin, topic, device_class='switch'):
-        super(Switch, self).__init__(name, pin, topic, device_class, 'generic_switch')
+    def __init__(self, name, pin, topic, device_class='switch', device_type='generic_switch'):
+        super(Switch, self).__init__(name, pin, topic, device_class, device_type)
         self.power_state = 'OFF'
         self.last_seen = datetime.now()
         self.setup()

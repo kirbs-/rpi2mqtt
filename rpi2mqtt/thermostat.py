@@ -41,7 +41,7 @@ class HestiaPi(Sensor):
         self.bme280 = BME280(self.name, self.topic)
 
         for mode, pins in HVAC.HEAT_PUMP_MODES.items():
-            switch = Switch(self.name, pins, '{}_{}'.format(self.topic, mode), mode)
+            switch = Switch(self.name, pins, '{}_{}'.format(self.topic, mode), mode, self.device_type)
             switch.setup()
             self.modes[mode] = switch
 
