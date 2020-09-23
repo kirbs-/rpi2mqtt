@@ -38,7 +38,7 @@ class Sensor(object):
 
     @property
     def homeassistant_mqtt_config(self):
-        return {'name': '{}_{}'.format(self.name, self.device_model),
+        return {'name': '{}_{}'.format(self.name, self.device_class),
                 'device_class': self.device_class,
                 'value_template': "{{ value_json.state }}",
                 'unique_id': '{}_{}_{}_rpi2mqtt'.format(self.name, self.device_model, self.device_class),
