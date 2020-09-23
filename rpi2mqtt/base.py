@@ -56,7 +56,7 @@ class Sensor(object):
         if self.device_class in Sensor.BINARY_SENSORS:
             homeassistant_sensor_type = 'binary_sensor'
 
-        return 'homeassistant/{}/{}_{}/config'.format(homeassistant_sensor_type, self.name, self.device_model)
+        return 'homeassistant/{}/{}_{}_{}/config'.format(homeassistant_sensor_type, self.name, self.device_model, self.device_class)
 
     def publish_mqtt_discovery(self):
 
