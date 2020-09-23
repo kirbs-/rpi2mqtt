@@ -137,7 +137,7 @@ class BME280(SensorGroup):
         self.topic = topic
         self.device_type = 'BME280'
         # self.setup_temperature()
-        self.setup_humidity()
+        # self.setup_humidity()
         self.setup_pressure()
 
 
