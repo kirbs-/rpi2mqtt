@@ -18,6 +18,8 @@ def sensor(func):
 
 class Sensor(object):
 
+    BINARY_SENSORS = ['reed']
+
     def __init__(self, name, pin, topic, device_class, device_model):
         self.name = name
         self.pin = pin
@@ -50,7 +52,11 @@ class Sensor(object):
 
     @property
     def homeassistant_mqtt_config_topic(self):
-        return 'homeassistant/{}/{}_{}/config'.format(self.device_class, self.name, self.device_model)
+        homeassistant_sensor_type = 'sensor'
+        if self.device_class in Sensor.BINARY_SENSORS:
+            homeassistant_sensor_type = 'binary_sensor'
+
+        return 'homeassistant/{}/{}_{}/config'.format(homeassistant_sensor_type, self.name, self.device_model)
 
     def publish_mqtt_discovery(self):
 
