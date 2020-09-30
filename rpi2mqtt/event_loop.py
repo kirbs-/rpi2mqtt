@@ -4,6 +4,7 @@ from rpi2mqtt.binary import *
 from rpi2mqtt.temperature import *
 from rpi2mqtt.ibeacon import Scanner
 from rpi2mqtt.switch import Switch
+from rpi2mqtt.thermostat import HestiaPi
 import time
 import rpi2mqtt.mqtt as mqtt
 from beacontools import BeaconScanner, IBeaconFilter
@@ -12,10 +13,8 @@ import logging
 import sys
 
 
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-
-
 def main():
+    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
     # start MQTT client
     mqtt.setup()
 
@@ -32,6 +31,8 @@ def main():
             s = ReedSwitch(sensor.name, sensor.pin, sensor.topic, sensor.normally_open, sensor.get('device_type'))
         elif sensor.type == 'bme280':
             s = BME280(sensor.name, sensor.topic)
+        elif sensort.type == 'hestiapi':
+            s = HestiaPi(sensor.name, sensor.topic, sensor.heat_point, sensor.cool_point, sensor.set_point_tolerance, sensor.min_run_time)
         else:
             logging.warn('Sensor {} found in config, but not setup.'.format(sensor.name))
         if s:
