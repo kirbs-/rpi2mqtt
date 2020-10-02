@@ -11,10 +11,23 @@ from beacontools import BeaconScanner, IBeaconFilter
 import traceback
 import logging
 import sys
+import argparse
+
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("c", "--config",
+                help="Path to config.yaml")
 
 
 def main():
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+
+    args = parser.parse_args() 
+
+    if args.config:
+        config.save(args.config)
+
     # start MQTT client
     mqtt.setup()
 
@@ -31,10 +44,10 @@ def main():
             s = ReedSwitch(sensor.name, sensor.pin, sensor.topic, sensor.normally_open, sensor.get('device_type'))
         elif sensor.type == 'bme280':
             s = BME280(sensor.name, sensor.topic)
-        elif sensort.type == 'hestiapi':
+        elif sensor.type == 'hestiapi':
             s = HestiaPi(sensor.name, sensor.topic, sensor.heat_point, sensor.cool_point, sensor.set_point_tolerance, sensor.min_run_time)
         else:
-            logging.warn('Sensor {} found in config, but not setup.'.format(sensor.name))
+            logging.warn('Sensor {} found in config, but was not setup.'.format(sensor.name))
         if s:
             sensor_list.append(s)
 
