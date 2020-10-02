@@ -1,0 +1,9 @@
+mqtt:
+    host: example.com
+    port: 8883
+    # ca_cert: '/path/to/certificate.crt'
+    # username: mqtt_user
+    # password: passworkd
+    retries: 3
+
+sensors:
