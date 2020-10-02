@@ -1,5 +1,5 @@
 # import asyncio
-from rpi2mqtt.config import config
+from rpi2mqtt.config import config, save
 from rpi2mqtt.binary import *
 from rpi2mqtt.temperature import *
 from rpi2mqtt.ibeacon import Scanner
@@ -16,7 +16,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("c", "--config",
+parser.add_argument("-c", "--config",
                 help="Path to config.yaml")
 
 
@@ -26,7 +26,7 @@ def main():
     args = parser.parse_args() 
 
     if args.config:
-        config.save(args.config)
+        save(args.config)
 
     # start MQTT client
     mqtt.setup()

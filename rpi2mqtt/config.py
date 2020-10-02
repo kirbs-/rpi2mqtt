@@ -15,7 +15,7 @@ config_file =  pkg_resources.resource_filename(__name__,'cconfig.yaml')
 def load():
     global config
     with open(config_file, 'r') as f:
-        config = DotMap(yaml.safe_loadtemplate)
+        config = DotMap(yaml.safe_load(f))
         config_filename = pathlib.Path(f.name).absolute()
         logging.info("Loaded config file {}".format(config_filename))
 
