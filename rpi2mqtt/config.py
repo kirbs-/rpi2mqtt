@@ -6,7 +6,7 @@ import pathlib
 import pkg_resources
 
 config = None
-config_file =  pkg_resources.resource_filename(__name__,'cconfig.yaml')
+config_file =  pkg_resources.resource_filename(__name__,'config.yaml')
 # template = pkg_resources.resource_string(resource_package, resource_path)
 # or for a file-like stream:
 # template = pkg_resources.resource_stream(__name__, config_file)
@@ -25,3 +25,5 @@ def save(filename):
         with open(config_file, 'w') as w:
             w.write(f.read())
     return load()
+
+load()

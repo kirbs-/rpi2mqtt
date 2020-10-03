@@ -4,8 +4,10 @@ from paho.mqtt.client import Client
 from rpi2mqtt.config import config
 import traceback
 import logging
+import sys
 
 
+# logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 client = Client('rpi2mqtt')
 subscribed_topics = {}
 
@@ -35,9 +37,9 @@ def setup():
     if config.mqtt.username or config.mqtt.password:
         client.username_pw_set(config.mqtt.username, config.mqtt.password)
 
-    logging.info("Connecting to " + config.mqtt.host + " port: " + str(config.mqtt.port))
+    logging.info("Connecting to " + config.mqtt.host + " port:" + str(config.mqtt.port))
     client.connect(config.mqtt.host, config.mqtt.port, 60)
-    logging.info("Successfully connected to {} port: {}".format(config.mqtt.host, str(config.mqtt.port)))
+    logging.info("Successfully connected to {} port:{}".format(config.mqtt.host, str(config.mqtt.port)))
 
     client.loop_start()
 
