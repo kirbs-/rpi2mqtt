@@ -107,3 +107,4 @@ ENV/
 .idea
 
 rpi2mqtt/ca-chain.crt
+rpi2mqtt/config.yaml
