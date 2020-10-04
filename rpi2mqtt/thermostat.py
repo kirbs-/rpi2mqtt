@@ -104,8 +104,8 @@ class HestiaPi(Sensor):
 
     @property
     def minutes_since_last_mode_change(self):
-        if self.active:
-            return (pendulum.now - self.last_mode_change_time).in_minutes() 
+        # if self.active:
+        return (pendulum.now - self.last_mode_change_time).in_minutes() 
 
     @property
     def hvac_state(self):
@@ -180,6 +180,7 @@ class HestiaPi(Sensor):
     def mode(self, mode):
         if mode in HVAC.HEAT_PUMP_MODES:
             self.mode = mode
+            self.last_mode_change_time = pendulum.now()
         else:
             raise IllegalArgumentException('{} mode is not a valid HVAC mode'.format(mode))
 
