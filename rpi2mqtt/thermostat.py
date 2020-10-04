@@ -189,7 +189,7 @@ class HestiaPi(Sensor):
             logging.warn("Don't change between heating and cooling. May damage your system.")
         elif self.active and self.active_time <= self.min_run_time:
             logging.warn("System needs to run for atleast {} minutes. Only running for {} minutes.".format(self.min_run_time, self.active_time))
-        elif self.minutes_since_last_mode_chage <= self.min_trigger_cooldown_time:
+        elif self.minutes_since_last_mode_change <= self.min_trigger_cooldown_time:
             logging.warn("Can only change mode every {} minutes. It's been {} minutes since last change.".format(self.min_trigger_cooldown_time, self.minutes_since_last_mode_change))
         elif self.mode == self.hvac_state:
             logging.info('Ignoring mode change since HVAC is alread in {} mode'.format(self.mode))
