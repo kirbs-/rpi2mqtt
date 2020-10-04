@@ -56,14 +56,14 @@ class HestiaPi(Sensor):
         # container to holder mode switches. Do not use directly.
         self._modes = {}
         super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
-        self.setup()
+        # self.setup()
 
     def setup(self):
         self.bme280 = BME280(self.name, self.topic)
 
         for mode, pins in HVAC.HEAT_PUMP_MODES.items():
             switch = Switch(self.name, pins, '{}_{}'.format(self.topic, mode), mode)
-            switch.setup()
+            # switch.setup()
             self._modes[mode] = switch
 
         # setup GPIO inputs on HVAC pins
@@ -139,6 +139,7 @@ class HestiaPi(Sensor):
 
     def callback(self, *args):
         # system active, should we turn it off?
+        logging.debug('Checking temperature...temp = {}, heat_setpoint = {}, cool_setpoint = {}, set_point_tolerance = {}'.format(self.temperature, self.set_point_heat, self.set_point_cool, self.set_point_tolerance))
         if self.active:
             # if heating is current temperature above set point?
             if self.mode == 'heat' and self.temperature > self.set_point_heat + self.set_point_tolerance:
