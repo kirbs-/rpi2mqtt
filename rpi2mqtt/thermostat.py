@@ -37,7 +37,7 @@ class HestiaPi(Sensor):
 
     def __init__(self, name, topic, heat_setpoint, cool_setpoint, set_point_tolerance=1.0, min_run_time=15):
         # self._modes = HVAC.HEAT_PUMP_MODES
-        # super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
+        super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
         self.mode = 'heat'
         # self.active = False
         # self.desired_mode = 'off'
@@ -55,10 +55,11 @@ class HestiaPi(Sensor):
         self.bme280 = None
         # container to holder mode switches. Do not use directly.
         self._modes = {}
-        super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
-        # self.setup()
+        # super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
+        self.setup()
 
     def setup(self):
+        logging.debug('Setting up HestiaPi')
         self.bme280 = BME280(self.name, self.topic)
 
         for mode, pins in HVAC.HEAT_PUMP_MODES.items():
