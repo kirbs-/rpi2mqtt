@@ -73,6 +73,7 @@ class HestiaPi(Sensor):
             GPIO.setup(pin, GPIO.IN)
 
     def set_state(self, mode, state):
+        return True
         if state == HVAC.ON:
             self.active_start_time = pendulum.now()
             self._modes[mode].on()
