@@ -38,7 +38,7 @@ class HestiaPi(Sensor):
     def __init__(self, name, topic, heat_setpoint, cool_setpoint, set_point_tolerance=1.0, min_run_time=15):
         # self._modes = HVAC.HEAT_PUMP_MODES
         # super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
-        self.mode = HVAC.HEAT_PUMP_MODES['heat']
+        self.mode = 'heat'
         # self.active = False
         # self.desired_mode = 'off'
         self.active_start_time = None
@@ -133,6 +133,8 @@ class HestiaPi(Sensor):
             'mode': self.mode,
             'active_time': self.active_time,
             'hvac_state': self.hvac_state,
+            'heat_setpoint': self.set_point_heat,
+            'cool_setpoint': self.set_point_cool,
         }
 
     def callback(self, *args):
@@ -147,6 +149,8 @@ class HestiaPi(Sensor):
                 # turn hvac off
                 logging.info('Temperature is {}. Turning cool off.'.format(self.temperature))
                 self.off()
+            else:
+                logging.warn('HVAC is active, but something is wrong. Mode is {}. Temperature is {}.'.format(self.mode, self.temperature))
         else:
             if self.mode == 'heat' and self.temperature < self.set_point_heat - self.set_point_tolerance:
                 # turn hvac on
@@ -156,6 +160,8 @@ class HestiaPi(Sensor):
                 # turn hvac on
                 logging.info('Temperature is {}. Turning cool on.'.format(self.temperature))
                 self.on()
+            else:
+                logging.warn('HVAC is inactive, but something is wrong. Mode is {}. Temperature is {}.'.format(self.mode, self.temperature))
             # system is inactive, should we turn it on?
 
         mqtt.publish(self.topic, self.payload())
