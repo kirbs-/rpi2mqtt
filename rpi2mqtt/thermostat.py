@@ -155,8 +155,6 @@ class HestiaPi(Sensor):
                 # turn hvac off
                 logging.info('Temperature is {}. Turning cool off.'.format(self.temperature))
                 self.off()
-            else:
-                logging.warn('HVAC is active, but something is wrong. Mode is {}. Temperature is {}.'.format(self.mode, self.temperature))
         else:
             if self.mode == 'heat' and self.temperature < self.set_point_heat - self.set_point_tolerance:
                 # turn hvac on
@@ -166,10 +164,8 @@ class HestiaPi(Sensor):
                 # turn hvac on
                 logging.info('Temperature is {}. Turning cool on.'.format(self.temperature))
                 self.on()
-            else:
-                logging.warn('HVAC is inactive, but something is wrong. Mode is {}. Temperature is {}.'.format(self.mode, self.temperature))
             # system is inactive, should we turn it on?
-
+        logging.info('HVAC is {}. Mode is {}. Temperature is {}.'.format(self.active, self.mode, self.temperature))
         mqtt.publish(self.topic, self.payload())
 
     # def mode_is_changeable(self):
