@@ -105,7 +105,10 @@ class HestiaPi(Sensor):
     @property
     def minutes_since_last_mode_change(self):
         # if self.active:
-        return (pendulum.now - self.last_mode_change_time).in_minutes() 
+        if self.last_mode_change_time:
+            return (pendulum.now() - self.last_mode_change_time).in_minutes() 
+        else:
+            return 1000
 
     @property
     def hvac_state(self):
