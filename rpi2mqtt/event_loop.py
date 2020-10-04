@@ -45,7 +45,7 @@ def main():
         elif sensor.type == 'bme280':
             s = BME280(sensor.name, sensor.topic)
         elif sensor.type == 'hestiapi':
-            s = HestiaPi(sensor.name, sensor.topic, sensor.heat_point, sensor.cool_point, sensor.set_point_tolerance, sensor.min_run_time)
+            s = HestiaPi(sensor.name, sensor.topic, sensor.heat_setpoint, sensor.cool_setpoint)
         else:
             logging.warn('Sensor {} found in config, but was not setup.'.format(sensor.name))
         if s:
