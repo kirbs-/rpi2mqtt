@@ -123,13 +123,13 @@ class HestiaPi(Sensor):
 
     @property
     def temperature(self):
-        temp = self.bse280.state()['temperature']
+        temp = self.bme280.state()['temperature']
         return temp * 1.8 + 32
 
     def state(self):
         data = self.bme280.state()
         return {
-            'bse280': data,
+            'bme280': data,
             'mode': self.mode,
             'active_time': self.active_time,
             'hvac_state': self.hvac_state,
@@ -201,27 +201,12 @@ class HestiaPi(Sensor):
         else:
             logging.warn('HVAC already {}ing in {} mode'.format(self.mode, self.mode))
 
-    # def fan(self, state=None):
-    #     if state:
-    #         self.desired_mode = 'fan'
-    #         logging.debug('Received Fan mode state update to {}'.format(state))
-    #         if self.mode_is_changeable():
-    #             logging.debug('Active mode is changeable. Switching to fan mode.')
-    #             self.mode = 'fan'
-    #             if self.active and state == 'off':
-    #                 self.set_state('fan', 'OFF')
-    #                 # turn off
-    #             elif not self.active and state == 'on':
-    #                 self.set_state('fan', 'ON')
-    #                 # turn on
-    #             else:
-    #                 pass
-    #                 # log and ignore fan is already in desire state
+    def off(self):
+        if self._can_change_hvac_state():
+            self.set_state(self.mode, HVAC.OFF)
 
-    #     return {
-    #         'active': self.active,
-    #         'state': self.hvac_state
-    #     }
+        else:
+            logging.warn("Did not activate HVAC.")
 
 
 
