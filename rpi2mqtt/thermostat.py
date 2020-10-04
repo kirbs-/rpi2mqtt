@@ -91,7 +91,10 @@ class HestiaPi(Sensor):
     @property
     def active_time(self):
         if self.active:
-            return (pendulum.now() - self.active_start_time).in_minutes() 
+            try:
+                return (pendulum.now() - self.active_start_time).in_minutes() 
+            except Exception as e:
+                logging.exception(e)
 
     @property
     def active(self):
@@ -115,6 +118,7 @@ class HestiaPi(Sensor):
         # search heat pump modes for a match
         for mode, p in HVAC.HEAT_PUMP_MODES.items():
             if active_pins == set(p):
+                logging.debug('HVAC mode is "{}". Active GPIO pins = {}'.format(mode, active_pins))
                 return mode
 
     @property
