@@ -24,43 +24,40 @@ class Switch(Sensor):
         del config['device_class']
         return config
 
-    def setup(self):
+    def setup(self, lazy_setup=True):
         """
         Setup Home Assistant MQTT discover for ibeacons.
         :return: None
         """
-        # device_config = {'name': "Switch",
-        #                  'identifiers': self.name,
-        #                  'sw_version': 'rpi2mqtt',
-        #                  'model': "Switch",
-        #                  'manufacturer': 'Generic'}
-
-        # config = json.dumps({'name': self.name + '_switch',
-        #                      # 'device_class': 'switch',
-        #                      'value_template': "{{ value_json.power_state }}",
-        #                      'unique_id': self.name + '_switch_rpi2mqtt',
-        #                      'state_topic': self.topic,
-        #                      "json_attributes_topic": self.topic + '/state',
-        #                      "command_topic": self.topic + '/set',
-        #                      'device': device_config})
-
-        # mqtt.publish('homeassistant/switch/{}_{}/config'.format(self.name, 'switch'), config)
-
         # setup GPIO
         g.setmode(g.BCM)
         if not type(self.pin) == list:
             self.pin = list(self.pin)
         # for pin in self.pin:
-        logging.info("Setting pins {} to ouptut.".format(self.pin))
-        g.setup(self.pin, g.OUT, initial=g.LOW)
+        if not lazy_setup:
+            self.setup_output()
         mqtt.subscribe(self.homeassistant_mqtt_config['command_topic'], self.mqtt_callback)
 
+    def setup_output(self):
+        logging.info("Setting pins {} to ouptut.".format(self.pin))
+        g.setup(self.pin, g.OUT, initial=g.LOW)
+
     def on(self):
-        g.output(self.pin, g.HIGH)
+        try:
+            g.output(self.pin, g.HIGH)
+        except RuntimeError as e:
+            logging.info("Switch output not configured yet. Setting up pins {}".format(self.pin))
+            self.setup_output()
+            g.output(self.pin, g.HIGH)
         self.power_state = 'ON'
 
     def off(self):
-        g.output(self.pin, g.LOW)
+        try:
+            g.output(self.pin, g.LOW)
+        except RuntimeError as e:
+            logging.info("Switch output not configured yet. Setting up pins {}".format(self.pin))
+            self.setup_output()
+            g.output(self.pin, g.LOW)
         self.power_state = 'OFF'
 
     def toggle(self):

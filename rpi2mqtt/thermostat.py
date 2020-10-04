@@ -64,7 +64,7 @@ class HestiaPi(Sensor):
 
         for mode, pins in HVAC.HEAT_PUMP_MODES.items():
             switch = Switch(self.name, pins, '{}_{}'.format(self.topic, mode), mode)
-            switch.setup()
+            # switch.setup()
             self._modes[mode] = switch
 
         # setup GPIO inputs on HVAC pins
