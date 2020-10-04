@@ -1,10 +1,15 @@
+import logging
+import sys
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+
 import yaml
 from dotmap import DotMap
 import os
-import logging
 import pathlib
 import pkg_resources
 
+
+# logging.getLogger().setLevel(logging.DEBUG)
 config = None
 config_file =  pkg_resources.resource_filename(__name__,'config.yaml')
 # template = pkg_resources.resource_string(resource_package, resource_path)

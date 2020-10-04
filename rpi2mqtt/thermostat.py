@@ -27,6 +27,9 @@ class HVAC(object):
     OFF = 'OFF'
 
 
+class HvacException(Exception):
+    pass
+
 class HestiaPi(Sensor):
 
     def __init__(self, name, topic, heat_setpoint, cool_setpoint, set_point_tolerance=1.0, min_run_time=15):
@@ -54,13 +57,13 @@ class HestiaPi(Sensor):
         self.bme280 = BME280(self.name, self.topic)
 
         for mode, pins in HVAC.HEAT_PUMP_MODES.items():
-            switch = Switch(self.name, pins, '{}_{}'.format(self.topic, mode), mode, self.device_type)
+            switch = Switch(self.name, pins, '{}_{}'.format(self.topic, mode), mode)
             switch.setup()
             self._modes[mode] = switch
 
         # setup GPIO inputs on HVAC pins
         GPIO.setmode(GPIO.BCM)
-        for capability, pin in HVAC.HEAT_PUMP:
+        for capability, pin in HVAC.HEAT_PUMP.items():
             GPIO.setup(pin, GPIO.IN)
 
     def set_state(self, mode, state):
@@ -71,7 +74,7 @@ class HestiaPi(Sensor):
             self._modes[mode].off()
             self.active_start_time = None
         else:
-            raise IllegalArgumentError("Fan state '{}' is not a valid state.".format(state))
+            raise HvacException("Fan state '{}' is not a valid state.".format(state))
         logging.info('Turned {} {}}.'.format(mode), state)
 
         # confirm mode change
