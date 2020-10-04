@@ -1,4 +1,8 @@
 # import asyncio
+import logging
+import sys
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+
 from rpi2mqtt.config import config, save
 from rpi2mqtt.binary import *
 from rpi2mqtt.temperature import *
@@ -9,20 +13,16 @@ import time
 import rpi2mqtt.mqtt as mqtt
 from beacontools import BeaconScanner, IBeaconFilter
 import traceback
-import logging
-import sys
 import argparse
 
 
+# setup CLI parser
 parser = argparse.ArgumentParser()
-
 parser.add_argument("-c", "--config",
                 help="Path to config.yaml")
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-
     args = parser.parse_args() 
 
     if args.config:

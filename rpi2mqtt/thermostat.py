@@ -7,6 +7,9 @@ import pendulum
 import logging
 
 
+
+
+
 class HVAC(object):
     HEAT_PUMP = {
         'fan': 18,
@@ -34,8 +37,8 @@ class HestiaPi(Sensor):
 
     def __init__(self, name, topic, heat_setpoint, cool_setpoint, set_point_tolerance=1.0, min_run_time=15):
         # self._modes = HVAC.HEAT_PUMP_MODES
-        super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
-        self.mode = HVAC.HEAT_PUMP_MODES['off']
+        # super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
+        self.mode = HVAC.HEAT_PUMP_MODES['heat']
         # self.active = False
         # self.desired_mode = 'off'
         self.active_start_time = None
@@ -52,6 +55,8 @@ class HestiaPi(Sensor):
         self.bme280 = None
         # container to holder mode switches. Do not use directly.
         self._modes = {}
+        super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
+        self.setup()
 
     def setup(self):
         self.bme280 = BME280(self.name, self.topic)
@@ -102,7 +107,7 @@ class HestiaPi(Sensor):
         """Current HVAC mode based on active GPIO pins."""
         active_pins = []
         # read pin state
-        for capability, pin in HVAC.HEAT_PUMP:
+        for capability, pin in HVAC.HEAT_PUMP.items():
             if GPIO.input(pin):
                 active_pins.append(pin)
         active_pins = set(active_pins)

@@ -51,6 +51,7 @@ class Switch(Sensor):
         if not type(self.pin) == list:
             self.pin = list(self.pin)
         for pin in self.pin:
+            logging.info("setting pin {} to ouptut.".format(pin))
             g.setup(pin, g.OUT)
         mqtt.subscribe(self.homeassistant_mqtt_config['command_topic'], self.mqtt_callback)
 
