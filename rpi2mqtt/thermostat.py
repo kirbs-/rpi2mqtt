@@ -137,6 +137,7 @@ class HestiaPi(Sensor):
             'bme280': data,
             'mode': self.mode,
             'active_time': self.active_time,
+            'active': self.active,
             'hvac_state': self.hvac_state,
             'heat_setpoint': self.set_point_heat,
             'cool_setpoint': self.set_point_cool,
