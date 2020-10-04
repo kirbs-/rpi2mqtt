@@ -187,7 +187,7 @@ class HestiaPi(Sensor):
         """Don't change HVAC state from heat to cool or vice versa if the system is running."""
         if (self.hvac_state == 'cool' and self.mode == 'heat') or (self.hvac_state == 'heat' and self.mode == 'cool'): 
             logging.warn("Don't change between heating and cooling. May damage your system.")
-        elif self.active_time <= self.min_run_time:
+        elif self.active and self.active_time <= self.min_run_time:
             logging.warn("System needs to run for atleast {} minutes. Only running for {} minutes.".format(self.min_run_time, self.active_time))
         elif self.minutes_since_last_mode_chage <= self.min_trigger_cooldown_time:
             logging.warn("Can only change mode every {} minutes. It's been {} minutes since last change.".format(self.min_trigger_cooldown_time, self.minutes_since_last_mode_change))
@@ -202,14 +202,14 @@ class HestiaPi(Sensor):
             self.set_state(self.mode, HVAC.ON)
             # TODO verify state was changed and publish result to MQTT
         else:
-            logging.warn('HVAC already {}ing in {} mode'.format(self.mode, self.mode))
+            logging.warn('Did not activate {}'.format(self.mode))
 
     def off(self):
         if self._can_change_hvac_state():
             self.set_state(self.mode, HVAC.OFF)
 
         else:
-            logging.warn("Did not activate HVAC.")
+            logging.warn("Did not deactivate {}}.".format(self.mode))
 
 
 
