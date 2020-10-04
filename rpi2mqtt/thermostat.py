@@ -73,12 +73,11 @@ class HestiaPi(Sensor):
             GPIO.setup(pin, GPIO.IN)
 
     def set_state(self, mode, state):
-        return True
         if state == HVAC.ON:
             self.active_start_time = pendulum.now()
-            self._modes[mode].on()
+            # self._modes[mode].on()
         elif state == HVAC.OFF:
-            self._modes[mode].off()
+            # self._modes[mode].off()
             self.active_start_time = None
         else:
             raise HvacException("Fan state '{}' is not a valid state.".format(state))
@@ -97,6 +96,7 @@ class HestiaPi(Sensor):
                 return (pendulum.now() - self.active_start_time).in_minutes() 
             except Exception as e:
                 logging.exception(e)
+        return 0
 
     @property
     def active(self):
