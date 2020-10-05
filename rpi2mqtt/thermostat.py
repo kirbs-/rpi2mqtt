@@ -85,7 +85,7 @@ class HestiaPi(Sensor):
 
         # confirm mode change
         if mode == self.hvac_state:
-            logging.info('Turned {} {}.'.format(mode), state)
+            logging.info('Turned {} {}.'.format(mode, state))
         else:
             logging.warn('Did not set mode to {}. Try again.'.format(mode))
 

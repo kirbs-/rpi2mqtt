@@ -1,7 +1,7 @@
 # import asyncio
 import logging
 import sys
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format='%{asctime}s:%{levelname}s:%{message}s')
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format='%(asctime)s:%(levelname)s:%(message)s')
 
 from rpi2mqtt.config import config, save
 from rpi2mqtt.binary import *
