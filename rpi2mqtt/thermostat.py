@@ -81,11 +81,11 @@ class HestiaPi(Sensor):
             self.active_start_time = None
         else:
             raise HvacException("Fan state '{}' is not a valid state.".format(state))
-        logging.info('Turned {} {}.'.format(mode, state))
+        # logging.info('Turned {} {}.'.format(mode, state))
 
         # confirm mode change
         if mode == self.hvac_state:
-            logging.info('Turned {} {}}.'.format(mode), state)
+            logging.info('Turned {} {}.'.format(mode), state)
         else:
             logging.warn('Did not set mode to {}. Try again.'.format(mode))
 
