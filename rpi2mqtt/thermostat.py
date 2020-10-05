@@ -208,9 +208,8 @@ class HestiaPi(Sensor):
     def off(self):
         if self._can_change_hvac_state():
             self.set_state(self.mode, HVAC.OFF)
-
         else:
-            logging.warn("Did not deactivate {}}.".format(self.mode))
+            logging.warn("Did not deactivate {}.".format(self.mode))
 
 
 
