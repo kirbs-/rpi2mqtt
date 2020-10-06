@@ -7,9 +7,6 @@ import pendulum
 import logging
 
 
-
-
-
 class HVAC(object):
     HEAT_PUMP = {
         'fan': 18,
@@ -33,6 +30,7 @@ class HVAC(object):
 class HvacException(Exception):
     pass
 
+
 class HestiaPi(Sensor):
 
     def __init__(self, name, topic, heat_setpoint, cool_setpoint, set_point_tolerance=1.0, min_run_time=15):
@@ -52,6 +50,7 @@ class HestiaPi(Sensor):
         # how soon can HVAC be activated again after stopping (in minutes)
         self.min_trigger_cooldown_time = 15
         self.last_mode_change_time = None
+        self.last_hvac_state_change_time = None
         self.bme280 = None
         # container to holder mode switches. Do not use directly.
         self._modes = {}
@@ -72,6 +71,22 @@ class HestiaPi(Sensor):
         for capability, pin in HVAC.HEAT_PUMP.items():
             GPIO.setup(pin, GPIO.IN)
 
+    def mqtt(self):
+        return {
+                state_topic: false,
+                min_temp: 65,
+                max_temp: 85,
+                modes: ['off', 'auto', 'heat', 'cool', 'aux'],
+                mode_state_topic: true,
+                mode_state_template: '{{ value_json.mode }}',
+                mode_command_topic: true,
+                current_temperature_topic: true,
+                current_temperature_template: '{{ value_json.temperature }}',
+                temperature_state_topic: true,
+                temperature_state_template: '{{ value_json.${temperatureStateProperty} }}',
+                temperature_command_topic: temperatureStateProperty,
+            }
+
     def set_state(self, mode, state):
         if state == HVAC.ON:
             self.active_start_time = pendulum.now()
@@ -80,8 +95,9 @@ class HestiaPi(Sensor):
             self._modes[mode].off()
             self.active_start_time = None
         else:
-            raise HvacException("Fan state '{}' is not a valid state.".format(state))
-        # logging.info('Turned {} {}.'.format(mode, state))
+            raise HvacException("State '{}' is not a valid state.".format(state))
+        
+        self.last_hvac_state_change_time = pendulum.now()
 
         # confirm mode change
         if mode == self.hvac_state:
@@ -107,6 +123,13 @@ class HestiaPi(Sensor):
         # if self.active:
         if self.last_mode_change_time:
             return (pendulum.now() - self.last_mode_change_time).in_minutes() 
+        else:
+            return 1000
+
+    @property
+    def minutes_since_last_hvac_state_change(self):
+        if self.last_hvac_state_change_time:
+            return (pendulum.now() - self.last_hvac_state_change_time).in_minutes() 
         else:
             return 1000
 
@@ -187,13 +210,15 @@ class HestiaPi(Sensor):
     def _can_change_hvac_state(self):
         """Don't change HVAC state from heat to cool or vice versa if the system is running."""
         if (self.hvac_state == 'cool' and self.mode == 'heat') or (self.hvac_state == 'heat' and self.mode == 'cool'): 
-            logging.warn("Don't change between heating and cooling. May damage your system.")
+            logging.warn("Don't change between heating and cooling. Doing so may damage your system.")
         elif self.active and self.active_time <= self.min_run_time:
             logging.warn("System needs to run for atleast {} minutes. Only running for {} minutes.".format(self.min_run_time, self.active_time))
+        elif not self.active and self.minutes_since_last_hvac_state_change <= self.min_run_time:
+            logging.warn("System needs to idle for atleast {} minutes. Only idle for {} minutes.".format(self.min_run_time, self.minutes_since_last_hvac_state_change))
         elif self.minutes_since_last_mode_change <= self.min_trigger_cooldown_time:
             logging.warn("Can only change mode every {} minutes. It's been {} minutes since last change.".format(self.min_trigger_cooldown_time, self.minutes_since_last_mode_change))
-        elif self.mode == self.hvac_state:
-            logging.info('Ignoring mode change since HVAC is alread in {} mode'.format(self.mode))
+        # elif self.mode == self.hvac_state:
+        #     logging.info('Ignoring mode change since HVAC is alread in {} mode'.format(self.mode))
         else:
             return True
 
