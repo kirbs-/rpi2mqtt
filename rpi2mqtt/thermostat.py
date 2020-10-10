@@ -26,6 +26,12 @@ class HVAC(object):
     ON = 'ON'
     OFF = 'OFF'
 
+    HEAT = 'heat'
+    COOL = 'cool'
+    AUX = 'aux'
+    AUTO = 'auto'
+    OFF = 'off'
+
 
 class HvacException(Exception):
     pass
@@ -71,39 +77,74 @@ class HestiaPi(Sensor):
         for capability, pin in HVAC.HEAT_PUMP.items():
             GPIO.setup(pin, GPIO.IN)
 
-    def mqtt(self):
+        # Subscribe to MQTT command topics
+        mqtt.subscribe(self.mode_command_topic, self.mqtt_set_mode_callback)
+        mqtt.subscribe(self.temperature_set_point_command_topic, self.mqtt_set_temperature_set_point_callback)
+        mqtt.subscribe(self.fan_command_topic, self.mqtt_set_fan_state_callback)
+
+    @property
+    def mode_command_topic(self):
+        return '{}/mode/set'.format(self.topic)
+
+    @property
+    def temperature_set_point_command_topic(self):
+        return '{}/temperature/set'.format(self.topic)
+
+    @property
+    def fan_command_topic(self):
+        return '{}/fan/set'.format(self.topic)
+
+    @property
+    def homeassistant_mqtt_config(self):
         return {
-                state_topic: false,
-                min_temp: 65,
-                max_temp: 85,
-                modes: ['off', 'auto', 'heat', 'cool', 'aux'],
-                mode_state_topic: true,
-                mode_state_template: '{{ value_json.mode }}',
-                mode_command_topic: true,
-                current_temperature_topic: true,
-                current_temperature_template: '{{ value_json.temperature }}',
-                temperature_state_topic: true,
-                temperature_state_template: '{{ value_json.${temperatureStateProperty} }}',
-                temperature_command_topic: temperatureStateProperty,
+                'name': '{}_{}'.format(self.name, self.device_class),
+                'unique_id': '{}_{}_{}_rpi2mqtt'.format(self.name, self.device_model, self.device_class),
+                "json_attributes_topic": self.topic,
+                'device': self.device_config,
+                'min_temp': 65,
+                'max_temp': 88,
+                'initial': 72,
+                'modes': ['off', 'auto', 'heat', 'cool', 'aux'],
+                'action_topic': self.topic,
+                'action_template': '{{ value_json.hvac_state }}',
+                'current_temperature_topic': self.topic,
+                'current_temperature_template': '{{ value_json.temperature }}',
+                'mode_state_topic': self.topic,
+                'mode_state_template': '{{ value_json.mode }}',
+                'mode_command_topic': self.mode_command_topic, 
+                'temperature_state_topic': self.topic,
+                'temperature_state_template': '{{ value_json.set_point }}',
+                'temperature_command_topic': self.temperature_set_point_command_topic,
+                'fan_modes': ['auto', 'on'],
+                'fan_mode_state_topic': self.topic,
+                'fan_mode_state_template': '{{ value_json.fan_state }}',
+                'fan_mode_command_topic': self.fan_mode_command_topic
             }
 
     def set_state(self, mode, state):
         if state == HVAC.ON:
             self.active_start_time = pendulum.now()
             self._modes[mode].on()
+
+            # confirm mode change
+            if mode == self.hvac_state:
+                logging.info('Turned {} {}.'.format(mode, state))
+            else:
+                logging.warn('Did not set HVAC state to {}. Try again.'.format(mode))
+
         elif state == HVAC.OFF:
             self._modes[mode].off()
             self.active_start_time = None
+
+            # confirm mode change
+            if 'off' == self.hvac_state:
+                logging.info('Turned {} {}.'.format(mode, state))
+            else:
+                logging.warn('Did not set HVAC state to {}. Try again.'.format(mode))
         else:
             raise HvacException("State '{}' is not a valid state.".format(state))
         
         self.last_hvac_state_change_time = pendulum.now()
-
-        # confirm mode change
-        if mode == self.hvac_state:
-            logging.info('Turned {} {}.'.format(mode, state))
-        else:
-            logging.warn('Did not set mode to {}. Try again.'.format(mode))
 
     @property
     def active_time(self):
@@ -116,7 +157,7 @@ class HestiaPi(Sensor):
 
     @property
     def active(self):
-        return self.hvac_state in  ['cool','heat','aux']
+        return self.hvac_state in  [HVAC.COOL, HVAC.HEAT, HVAC.AUX]
 
     @property
     def minutes_since_last_mode_change(self):
@@ -132,6 +173,13 @@ class HestiaPi(Sensor):
             return (pendulum.now() - self.last_hvac_state_change_time).in_minutes() 
         else:
             return 1000
+
+    @property
+    def set_point(self):
+        if self.mode == HVAC.HEAT:
+            return self.set_point_heat
+        elif self.mode == HVAC.COOL:
+            return self.set_point_cool
 
     @property
     def hvac_state(self):
@@ -164,6 +212,8 @@ class HestiaPi(Sensor):
             'hvac_state': self.hvac_state,
             'heat_setpoint': self.set_point_heat,
             'cool_setpoint': self.set_point_cool,
+            'set_point': self.set_point,
+            'temperature': self.temperature,
         }
 
     def callback(self, *args):
@@ -236,6 +286,31 @@ class HestiaPi(Sensor):
         else:
             logging.warn("Did not deactivate {}.".format(self.mode))
 
+    def mqtt_set_temperature_set_point_callback(self, client, userdata, message):
+        try:
+            logging.info("Received temperature set point update request: {}".format(message))
+            payload = message.payload
+            if self.mode == HVAC.HEAT:
+                self.set_point_heat = payload
+            else:
+                self.set_point_cool = payload
+        except Exception as e:
+            logging.error('Unable to proces message.', e)
+
+        mqtt.publish(self.topic, self.payload())
+
+    def mqtt_set_fan_state_callback(self, fan_state):
+        pass
+
+    def mqtt_set_mode_callback(self, mode):
+        try:
+            logging.info("Received HVAC mode update request: {}".format(message))
+            payload = message.payload
+            self.mode(payload)
+        except Exception as e:
+            logging.error('Unable to proces message.', e)
+
+        mqtt.publish(self.topic, self.payload())
 
 
 
