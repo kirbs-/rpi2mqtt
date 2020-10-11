@@ -95,6 +95,10 @@ class HestiaPi(Sensor):
         return '{}/fan/set'.format(self.topic)
 
     @property
+    def homeassistant_mqtt_config_topic(self):
+        return 'homeassistant/{}/{}/config'.format(homeassistant_sensor_type, self.name)
+
+    @property
     def homeassistant_mqtt_config(self):
         return {
                 'name': '{}_{}'.format(self.name, self.device_class),
@@ -118,7 +122,7 @@ class HestiaPi(Sensor):
                 'fan_modes': ['auto', 'on'],
                 'fan_mode_state_topic': self.topic,
                 'fan_mode_state_template': '{{ value_json.fan_state }}',
-                'fan_mode_command_topic': self.fan_mode_command_topic
+                'fan_mode_command_topic': self.fan_command_topic
             }
 
     def set_state(self, mode, state):
