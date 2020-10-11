@@ -96,7 +96,7 @@ class HestiaPi(Sensor):
 
     @property
     def homeassistant_mqtt_config_topic(self):
-        return 'homeassistant/{}/{}/config'.format(homeassistant_sensor_type, self.name)
+        return 'homeassistant/{}/{}/config'.format('climate', self.name)
 
     @property
     def homeassistant_mqtt_config(self):
