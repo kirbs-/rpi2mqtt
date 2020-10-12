@@ -79,6 +79,9 @@ class BasicSwitch(Sensor):
     def payload(self):
         return json.dumps({'power_state': self.state()})
 
+    def publish_mqtt_discovery(self):
+        pass
+
 
 
 class Switch(Sensor):
