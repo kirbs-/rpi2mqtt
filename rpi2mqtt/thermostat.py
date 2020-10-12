@@ -1,4 +1,4 @@
-from rpi2mqtt.switch import Switch
+from rpi2mqtt.switch import BasicSwitch
 from rpi2mqtt.base import Sensor
 import rpi2mqtt.mqtt as mqtt
 from rpi2mqtt.temperature import BME280
@@ -68,7 +68,7 @@ class HestiaPi(Sensor):
         self.bme280 = BME280(self.name, self.topic)
 
         for mode, pins in HVAC.HEAT_PUMP_MODES.items():
-            switch = Switch(self.name, pins, '{}_{}'.format(self.topic, mode), mode)
+            switch = BasicSwitch(self.name, pins, '{}_{}'.format(self.topic, mode), mode)
             # switch.setup()
             self._modes[mode] = switch
 

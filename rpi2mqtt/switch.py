@@ -7,6 +7,80 @@ import logging
 
 # logging.basicConfig(level=logging.INFO)
 
+
+class BasicSwitch(Sensor):
+    """Basic switch setup to control GPIO pins and read their state
+
+    Args:
+        Sensor ([type]): [description]
+    """
+    def __init__(self, name, pin, topic, device_class='switch', device_type='generic_switch'):
+        super(BasicSwitch, self).__init__(name, pin, topic, device_class, device_type)
+        self.power_state = 'OFF'
+        self.last_seen = datetime.now()
+        # self.setup()
+
+    def setup(self, lazy_setup=True):
+        """
+        Setup Home Assistant MQTT discover for ibeacons.
+        :return: None
+        """
+        # setup GPIO
+        g.setmode(g.BCM)
+        if not type(self.pin) == list:
+            self.pin = list(self.pin)
+        # for pin in self.pin:
+        if not lazy_setup:
+            self.setup_output()
+
+    def setup_output(self):
+        logging.info("Setting pins {} to ouptut.".format(self.pin))
+        g.setup(self.pin, g.OUT, initial=g.LOW)
+
+    def on(self):
+        try:
+            g.output(self.pin, g.HIGH)
+        except RuntimeError as e:
+            logging.info("Switch output not configured yet. Setting up pins {}".format(self.pin))
+            self.setup_output()
+            g.output(self.pin, g.HIGH)
+        self.power_state = 'ON'
+
+    def off(self):
+        try:
+            g.output(self.pin, g.LOW)
+        except RuntimeError as e:
+            logging.info("Switch output not configured yet. Setting up pins {}".format(self.pin))
+            self.setup_output()
+            g.output(self.pin, g.LOW)
+        self.power_state = 'OFF'
+
+    def toggle(self):
+        if self.power_state == 'ON':  # and self.last_seen + timedelta(seconds=self.away_timeout) < datetime.now():
+            self.off()
+        else:
+            self.on()
+
+    def state(self):
+        # read output pin state
+        pin_state = g.input(self.pin)
+
+        # convert to home assistant on/off state defaults
+        # https://www.home-assistant.io/integrations/switch.mqtt/#state_on
+        if pin_state == 1:
+            self.power_state = 'ON'
+        elif pin_state == 0:
+            self.power_state = 'OFF'
+        else:
+            self.power_state = 'INVALID'
+
+        return self.power_state
+
+    def payload(self):
+        return json.dumps({'power_state': self.state()})
+
+
+
 class Switch(Sensor):
 
     def __init__(self, name, pin, topic, device_class='switch', device_type='generic_switch'):
