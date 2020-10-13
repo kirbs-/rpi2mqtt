@@ -56,6 +56,6 @@ def on_subscribe(mqttc, obj, mid, granted_qos):
 
 
 def subscribe(topic, callback):
-    logging.info("Subsribed topic %s", topic)
+    logging.info("Subscribing to topic %s", topic)
     client.subscribe(topic)
     client.message_callback_add(topic, callback)

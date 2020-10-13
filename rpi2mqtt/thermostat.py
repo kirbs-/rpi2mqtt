@@ -206,7 +206,7 @@ class HestiaPi(Sensor):
     @property
     def temperature(self):
         temp = self.bme280.state()['temperature']
-        return temp * 1.8 + 32
+        return temp
 
     def state(self):
         data = self.bme280.state()
