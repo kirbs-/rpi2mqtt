@@ -5,6 +5,7 @@ from rpi2mqtt.temperature import BME280
 import RPi.GPIO as GPIO
 import pendulum
 import logging
+import json
 
 
 class HVAC(object):
