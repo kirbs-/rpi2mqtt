@@ -220,6 +220,9 @@ class HestiaPi(Sensor):
             'temperature': self.temperature,
         }
 
+    def payload(self):
+        return json.dumps(self.state())
+
     def callback(self, *args):
         # system active, should we turn it off?
         logging.debug('Checking temperature...temp = {}, heat_setpoint = {}, cool_setpoint = {}, set_point_tolerance = {}'.format(self.temperature, self.set_point_heat, self.set_point_cool, self.set_point_tolerance))
