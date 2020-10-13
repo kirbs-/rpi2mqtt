@@ -92,7 +92,7 @@ class GenericTemperature(Sensor):
     def homeassistant_mqtt_config(self):
         config = super(GenericTemperature, self).homeassistant_mqtt_config
         config['value_template'] = "{{ value_json.temperature }}"
-        config['unit_of_measurement'] = '°C'
+        config['unit_of_measurement'] = '°F'
         return config
 
     def setup(self):
@@ -169,7 +169,7 @@ class BME280(SensorGroup):
         data = bme280.sample(self.bus, self.address, self.calibration_params)
         return {'id': str(data.id),
             'timestamp': str(data.timestamp),
-            'temperature': data.temperature,
+            'temperature': data.temperature * 1.8 + 32,
             'pressure': data.pressure,
             'humidity': data.humidity,
             }
