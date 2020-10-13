@@ -110,7 +110,7 @@ class HestiaPi(Sensor):
                 'max_temp': 88,
                 'initial': 72,
                 'modes': ['off', 'auto', 'heat', 'cool', 'aux'],
-                'fan_modes': ['auto','high']
+                'fan_modes': ['auto','high'],
                 'action_topic': self.topic,
                 'action_template': '{{ value_json.hvac_state }}',
                 'current_temperature_topic': self.topic,
