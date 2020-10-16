@@ -8,7 +8,7 @@ import sys
 
 
 # logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-client = Client('rpi2mqtt')
+client = Client()
 subscribed_topics = {}
 
 
@@ -29,6 +29,7 @@ def publish(topic, payload, cnt=1):
 
 
 def setup():
+    global client
     client.tls_set(ca_certs=config.mqtt.ca_cert) #, certfile=None, keyfile=None, cert_reqs=cert_required, tls_version=tlsVersion)
 
     # if args.insecure:
@@ -56,6 +57,9 @@ def on_subscribe(mqttc, obj, mid, granted_qos):
 
 
 def subscribe(topic, callback):
+    global client
     logging.info("Subscribing to topic %s", topic)
-    client.subscribe(topic)
+    res = client.subscribe(topic)
+    logging.info('Subscription result = {}'.format(res))
     client.message_callback_add(topic, callback)
+    return res
