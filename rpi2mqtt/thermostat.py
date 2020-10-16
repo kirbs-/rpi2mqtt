@@ -299,8 +299,8 @@ class HestiaPi(Sensor):
 
     def mqtt_set_temperature_set_point_callback(self, client, userdata, message):
         try:
-            logging.info("Received temperature set point update request: {}".format(message))
-            payload = message.payload
+            logging.info("Received temperature set point update request: {}".format(message.payload))
+            payload = message.payload.decode()
             if self.mode == HVAC.HEAT:
                 self.set_point_heat = payload
             else:
@@ -316,7 +316,7 @@ class HestiaPi(Sensor):
     def mqtt_set_mode_callback(self, mode):
         try:
             logging.info("Received HVAC mode update request: {}".format(message))
-            payload = message.payload
+            payload = message.payload.decode()
             self.mode(payload)
         except Exception as e:
             logging.error('Unable to proces message.', e)
