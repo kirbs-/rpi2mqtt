@@ -114,7 +114,7 @@ class HestiaPi(Sensor):
                 'action_topic': self.topic,
                 'action_template': '{{ value_json.hvac_state }}',
                 'current_temperature_topic': self.topic,
-                'current_temperature_template': '{{ value_json.temperature | round(1) }}',
+                'current_temperature_template': '{{ value_json.current_temperature | round(1) }}',
                 'mode_state_topic': self.topic,
                 'mode_state_template': '{{ value_json.mode }}',
                 'mode_command_topic': self.mode_command_topic, 
@@ -219,7 +219,7 @@ class HestiaPi(Sensor):
             'heat_setpoint': self.set_point_heat,
             'cool_setpoint': self.set_point_cool,
             'set_point': self.set_point,
-            'temperature': self.bme280.state()['temperature'],
+            'current_temperature': self.bme280.state()['temperature'],
             'humidity': self.bme280.state()['humidity'],
             'pressure': self.bme280.state()['pressure'],
         }
