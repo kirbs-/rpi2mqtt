@@ -300,7 +300,7 @@ class HestiaPi(Sensor):
     def mqtt_set_temperature_set_point_callback(self, client, userdata, message):
         try:
             logging.info("Received temperature set point update request: {}".format(message.payload))
-            payload = message.payload.decode()
+            payload = float(message.payload.decode())
             if self.mode == HVAC.HEAT:
                 self.set_point_heat = payload
             else:
