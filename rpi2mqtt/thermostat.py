@@ -206,7 +206,7 @@ class HestiaPi(Sensor):
     @property
     def temperature(self):
         temp = self.bme280.state()['temperature']
-        return temp
+        return round(temp, 1)
 
     def state(self):
         data = self.bme280.state()
@@ -219,7 +219,7 @@ class HestiaPi(Sensor):
             'heat_setpoint': self.set_point_heat,
             'cool_setpoint': self.set_point_cool,
             'set_point': self.set_point,
-            'current_temperature': self.bme280.state()['temperature'],
+            'current_temperature': round(self.bme280.state()['temperature'], 1),
             'humidity': self.bme280.state()['humidity'],
             'pressure': self.bme280.state()['pressure'],
         }
