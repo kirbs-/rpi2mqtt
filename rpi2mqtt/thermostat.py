@@ -227,7 +227,7 @@ class HestiaPi(Sensor):
             'heat_setpoint': self.set_point_heat,
             'cool_setpoint': self.set_point_cool,
             'set_point': self.set_point,
-            'current_temperature': round(self.bme280.state()['temperature'], 1),
+            'current_temperature': self.temperature,
             'humidity': self.bme280.state()['humidity'],
             'pressure': self.bme280.state()['pressure'],
         }
