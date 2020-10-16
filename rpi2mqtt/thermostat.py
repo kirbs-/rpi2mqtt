@@ -204,9 +204,17 @@ class HestiaPi(Sensor):
                 return mode
 
     @property
+    def ha_hvac_state(self):
+        state = self.hvac_state
+        if state in ['heat','cool']:
+            return '{}ing'.format(state)
+        else:
+            return state
+
+    @property
     def temperature(self):
         temp = self.bme280.state()['temperature']
-        return round(temp, 1)
+        return round(temp)
 
     def state(self):
         data = self.bme280.state()
@@ -215,7 +223,7 @@ class HestiaPi(Sensor):
             'mode': self.mode,
             'active_time': self.active_time,
             'active': self.active,
-            'hvac_state': self.hvac_state,
+            'hvac_state': self.ha_hvac_state,
             'heat_setpoint': self.set_point_heat,
             'cool_setpoint': self.set_point_cool,
             'set_point': self.set_point,
