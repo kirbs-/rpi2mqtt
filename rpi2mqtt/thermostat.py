@@ -121,7 +121,7 @@ class HestiaPi(Sensor):
                 'temperature_state_topic': self.topic,
                 'temperature_state_template': '{{ value_json.set_point }}',
                 'temperature_command_topic': self.temperature_set_point_command_topic,
-                'fan_modes': ['auto', 'on'],
+                'fan_modes': ['auto', 'high'],
                 'fan_mode_state_topic': self.topic,
                 'fan_mode_state_template': '{{ value_json.fan_state }}',
                 'fan_mode_command_topic': self.fan_command_topic
