@@ -22,15 +22,18 @@ class HVAC(object):
         'heat': [HEAT_PUMP['fan'], HEAT_PUMP['compressor']],
         'cool': [HEAT_PUMP['fan'], HEAT_PUMP['compressor'], HEAT_PUMP['reversing_valve']],
         'aux': [HEAT_PUMP['fan'], HEAT_PUMP['compressor'], HEAT_PUMP['aux']],
+        'emergency': [HEAT_PUMP['fan'], HEAT_PUMP['aux']],
     }
 
-    ON = 'ON'
-    OFF = 'OFF'
+    # ON = 'ON'
+    # OFF = 'OFF'
 
     HEAT = 'heat'
     COOL = 'cool'
     AUX = 'aux'
+    EMERGENCY = 'emergency'
     AUTO = 'auto'
+    ON = 'on'
     OFF = 'off'
 
 
@@ -268,13 +271,13 @@ class HestiaPi(Sensor):
     #     minutes_since_last_mode_change = (pendulum.now - self.last_mode_change_time).in_minutes()
     #     return not self.active and self.active_time >= self.min_run_time and self.minutes_since_last_mode_chage >= self.min_trigger_cooldown_time
 
-
     def mode(self, mode):
+        logging.info('Changing mode to {}.'.format(mode))
         if mode in HVAC.HEAT_PUMP_MODES:
             self.mode = mode
             self.last_mode_change_time = pendulum.now()
         else:
-            raise IllegalArgumentException('{} mode is not a valid HVAC mode'.format(mode))
+            raise HvacException('{} mode is not a valid HVAC mode'.format(mode))
 
     def _can_change_hvac_state(self):
         """Don't change HVAC state from heat to cool or vice versa if the system is running."""
