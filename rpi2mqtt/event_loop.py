@@ -21,6 +21,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--config",
                 help="Path to config.yaml")
 
+parser.add_argument('-d', '--dry-run', help='Test drive config without triggering callbacks.')
+
 
 def main():
     args = parser.parse_args() 
@@ -45,7 +47,7 @@ def main():
         elif sensor.type == 'bme280':
             s = BME280(sensor.name, sensor.topic)
         elif sensor.type == 'hestiapi':
-            s = HestiaPi(sensor.name, sensor.topic, sensor.heat_setpoint, sensor.cool_setpoint)
+            s = HestiaPi(sensor.name, sensor.topic, sensor.heat_setpoint, sensor.cool_setpoint, dry_run=args.dry_run)
         else:
             logging.warn('Sensor {} found in config, but was not setup.'.format(sensor.name))
         if s:

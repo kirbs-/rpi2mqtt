@@ -20,7 +20,7 @@ class Sensor(object):
 
     BINARY_SENSORS = ['reed']
 
-    def __init__(self, name, pin, topic, device_class, device_model):
+    def __init__(self, name, pin, topic, device_class, device_model, **kwargs):
         self.name = name
         self.pin = pin
         self.topic = topic
@@ -76,7 +76,7 @@ class Sensor(object):
     def payload(self):
         return json.dumps({'state': self.state()})
 
-    def callback(self, *args):
+    def callback(self, **kwargs):
         mqtt.publish(self.topic, self.payload())
 
 

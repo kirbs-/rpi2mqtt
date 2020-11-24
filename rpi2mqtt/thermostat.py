@@ -6,6 +6,7 @@ import RPi.GPIO as GPIO
 import pendulum
 import logging
 import json
+import rpi2mqtt.math as math
 
 
 class HVAC(object):
@@ -43,7 +44,7 @@ class HvacException(Exception):
 
 class HestiaPi(Sensor):
 
-    def __init__(self, name, topic, heat_setpoint, cool_setpoint, set_point_tolerance=1.0, min_run_time=15):
+    def __init__(self, name, topic, heat_setpoint, cool_setpoint, set_point_tolerance=1.0, min_run_time=15, **kwargs):
         # self._modes = HVAC.HEAT_PUMP_MODES
         super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
         self.mode = 'heat'
@@ -64,7 +65,14 @@ class HestiaPi(Sensor):
         self.bme280 = None
         # container to holder mode switches. Do not use directly.
         self._modes = {}
+        # container to store temperature history
+        self.temperature_history = []
+        # Minimum temperature rate of change over 4 measurements
+        self.minimum_temp_rate_of_change = .15
         # super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
+        # put thermostat into test mode. i.e. don't trigger HVAC commands
+        self.dry_run = kwargs.get('dry_run')
+
         self.setup()
 
     def setup(self):
@@ -131,27 +139,29 @@ class HestiaPi(Sensor):
             }
 
     def set_state(self, mode, state):
-        if state == HVAC.ON:
-            self.active_start_time = pendulum.now()
-            self._modes[mode].on()
+        if not self.dry_run:
+            if state == HVAC.ON:
+                self.active_start_time = pendulum.now()
+                self._modes[mode].on()
 
-            # confirm mode change
-            if mode == self.hvac_state:
-                logging.info('Turned {} {}.'.format(mode, state))
+                # confirm mode change
+                if mode == self.hvac_state:
+                    logging.debug('Turned {} {}.'.format(mode, state))
+                else:
+                    logging.warn('Did not set HVAC state to {}. Try again.'.format(mode))
+
+            elif state == HVAC.OFF:
+                self._modes[mode].off()
+                self.active_start_time = None
+                self.temperature_history = []
+
+                # confirm mode change
+                if 'off' == self.hvac_state:
+                    logging.debug('Turned {} {}.'.format(mode, state))
+                else:
+                    logging.warn('Did not set HVAC state to {}. Try again.'.format(mode))
             else:
-                logging.warn('Did not set HVAC state to {}. Try again.'.format(mode))
-
-        elif state == HVAC.OFF:
-            self._modes[mode].off()
-            self.active_start_time = None
-
-            # confirm mode change
-            if 'off' == self.hvac_state:
-                logging.info('Turned {} {}.'.format(mode, state))
-            else:
-                logging.warn('Did not set HVAC state to {}. Try again.'.format(mode))
-        else:
-            raise HvacException("State '{}' is not a valid state.".format(state))
+                raise HvacException("State '{}' is not a valid state.".format(state))
         
         self.last_hvac_state_change_time = pendulum.now()
 
@@ -220,7 +230,17 @@ class HestiaPi(Sensor):
 
     @property
     def temperature(self):
-        return self.bme280.state()['temperature']
+        temp = self.bme280.state()['temperature']
+        self.temperature_history(0, temp)
+        if len(self.temperature_history) > 3: # how many readings should we keep track of. 4 is ~20 minutes.
+            self.temperature_history.pop()
+
+    @property
+    def temperature_rate_of_change(self):
+        if len(self.temperature_history) > 3:
+            roc = math.rate_of_chage(self.temperature_history)
+            logging.debug('Temperature rate of change is {}.'.format(roc))
+            return roc
 
     def state(self):
         data = self.bme280.state()
@@ -243,17 +263,24 @@ class HestiaPi(Sensor):
 
     def callback(self, *args):
         # system active, should we turn it off?
-        logging.debug('Checking temperature...temp = {}, heat_setpoint = {}, cool_setpoint = {}, set_point_tolerance = {}'.format(self.temperature, self.set_point_heat, self.set_point_cool, self.set_point_tolerance))
+        logging.info('Checking temperature...temp = {}, heat_setpoint = {}, cool_setpoint = {}, set_point_tolerance = {}'.format(self.temperature, self.set_point_heat, self.set_point_cool, self.set_point_tolerance))
         if self.active:
-            # if heating is current temperature above set point?
-            if self.mode == 'heat' and self.temperature > self.set_point_heat + self.set_point_tolerance:
+            if self.mode in ['heat', 'aux'] and self.temperature > self.set_point_heat + self.set_point_tolerance:
                 # turn hvac off
                 logging.info('Temperature is {}. Turning heat off.'.format(self.temperature))
                 self.off()
+                # reset mode to normal heat
+                if self._boost_heat:
+                    self.mode = HVAC.HEAT
             elif self.mode == 'cool' and self.temperature < self.set_point_cool - self.set_point_tolerance:
                 # turn hvac off
                 logging.info('Temperature is {}. Turning cool off.'.format(self.temperature))
                 self.off()
+
+            # should system boost heating with aux heat?
+            if self.mode == HVAC.HEAT and self.temperature_rate_of_change <= self.minimum_temp_rate_of_change:
+                self.boost_heat()
+
         else:
             if self.mode == 'heat' and self.temperature < self.set_point_heat - self.set_point_tolerance:
                 # turn hvac on
@@ -264,7 +291,7 @@ class HestiaPi(Sensor):
                 logging.info('Temperature is {}. Turning cool on.'.format(self.temperature))
                 self.on()
             # system is inactive, should we turn it on?
-        logging.info('HVAC is {}. Mode is {}. Temperature is {}.'.format(self.active, self.mode, self.temperature))
+        # logging.info('HVAC is {}. Mode is {}. Temperature is {}.'.format(self.active, self.mode, self.temperature))
         mqtt.publish(self.topic, self.payload())
 
     # def mode_is_changeable(self):
@@ -274,7 +301,7 @@ class HestiaPi(Sensor):
     #     minutes_since_last_mode_change = (pendulum.now - self.last_mode_change_time).in_minutes()
     #     return not self.active and self.active_time >= self.min_run_time and self.minutes_since_last_mode_chage >= self.min_trigger_cooldown_time
 
-    def mode(self, mode):
+    def set_mode(self, mode):
         logging.info('Changing mode to {}.'.format(mode))
         if mode in HVAC.HEAT_PUMP_MODES:
             self.mode = mode
@@ -310,6 +337,12 @@ class HestiaPi(Sensor):
             self.set_state(self.mode, HVAC.OFF)
         else:
             logging.warn("Did not deactivate {}.".format(self.mode))
+
+    def boost_heat(self):
+        # manually switching to AUX heat since we don't want to trigger state or mode safety checks.
+        self.mode = HVAC.AUX
+        self.set_state(self.mode, HVAC.ON)
+        self._boost_heat = True
 
     def mqtt_set_temperature_set_point_callback(self, client, userdata, message):
         try:
