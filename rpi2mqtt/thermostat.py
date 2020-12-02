@@ -256,6 +256,7 @@ class HestiaPi(Sensor):
         self.temperature_history.insert(0, temp)
         if len(self.temperature_history) > 3: # how many readings should we keep track of. 4 is ~20 minutes.
             self.temperature_history.pop()
+        return temp
 
     @property
     def temperature_rate_of_change(self):
