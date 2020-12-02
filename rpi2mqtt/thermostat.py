@@ -23,6 +23,7 @@ class HVAC(object):
         'heat': [HEAT_PUMP['fan'], HEAT_PUMP['compressor']],
         'cool': [HEAT_PUMP['fan'], HEAT_PUMP['compressor'], HEAT_PUMP['reversing_valve']],
         'aux': [HEAT_PUMP['fan'], HEAT_PUMP['compressor'], HEAT_PUMP['aux']],
+        'boost': [HEAT_PUMP['aux']],
         'emergency': [HEAT_PUMP['fan'], HEAT_PUMP['aux']],
     }
 
@@ -33,6 +34,7 @@ class HVAC(object):
     COOL = 'cool'
     AUX = 'aux'
     EMERGENCY = 'emergency'
+    BOOST = 'boost'
     AUTO = 'auto'
     ON = 'on'
     OFF = 'off'
@@ -72,6 +74,9 @@ class HestiaPi(Sensor):
         # super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
         # put thermostat into test mode. i.e. don't trigger HVAC commands
         self.dry_run = kwargs.get('dry_run')
+        # save boost state
+        self._boosting_heat = False
+        self._boosting_start_time = None
 
         self.setup()
 
@@ -93,6 +98,7 @@ class HestiaPi(Sensor):
         mqtt.subscribe(self.mode_command_topic, self.mqtt_set_mode_callback)
         mqtt.subscribe(self.temperature_set_point_command_topic, self.mqtt_set_temperature_set_point_callback)
         mqtt.subscribe(self.fan_command_topic, self.mqtt_set_fan_state_callback)
+        mqtt.subscribe(self.aux_command_topic, self.mqtt_set_aux_mode_callback)
 
     @property
     def mode_command_topic(self):
@@ -105,6 +111,10 @@ class HestiaPi(Sensor):
     @property
     def fan_command_topic(self):
         return '{}/fan/set'.format(self.topic)
+
+    @property
+    def  aux_command_topic(self):
+        return '{}/aux/set'.format(self.topic)
 
     @property
     def homeassistant_mqtt_config_topic(self):
@@ -132,6 +142,9 @@ class HestiaPi(Sensor):
                 'temperature_state_topic': self.topic,
                 'temperature_state_template': '{{ value_json.set_point }}',
                 'temperature_command_topic': self.temperature_set_point_command_topic,
+                'aux_state_topic': self.topic,
+                'aux_state_topic': '{{ value_json.aux_mode }}',
+                'aux_command_topic': self.aux_command_topic,
                 'fan_modes': ['auto', 'high'],
                 'fan_mode_state_topic': self.topic,
                 'fan_mode_state_template': '{{ value_json.fan_state }}',
@@ -170,6 +183,15 @@ class HestiaPi(Sensor):
         if self.active:
             try:
                 return (pendulum.now() - self.active_start_time).in_minutes() 
+            except Exception as e:
+                logging.exception(e)
+        return 0
+
+    @property
+    def boosting_active_time(self):
+        if self._boosting_heat:
+            try:
+                return (pendulum.now() - self._boosting_start_time).in_minutes() 
             except Exception as e:
                 logging.exception(e)
         return 0
@@ -247,7 +269,9 @@ class HestiaPi(Sensor):
         return {
             'bme280': data,
             'mode': self.mode,
+            'aux_mode': self._boosting_heat,
             'active_time': self.active_time,
+            'aux_active_time': self.boosting_active_time,
             'active': self.active,
             'hvac_state': self.ha_hvac_state,
             'heat_setpoint': self.set_point_heat,
@@ -261,7 +285,7 @@ class HestiaPi(Sensor):
     def payload(self):
         return json.dumps(self.state())
 
-    def callback(self, *args):
+    def callback(self, **kwargs):
         # system active, should we turn it off?
         logging.info('Checking temperature...temp = {}, heat_setpoint = {}, cool_setpoint = {}, set_point_tolerance = {}'.format(self.temperature, self.set_point_heat, self.set_point_cool, self.set_point_tolerance))
         if self.active:
@@ -269,17 +293,20 @@ class HestiaPi(Sensor):
                 # turn hvac off
                 logging.info('Temperature is {}. Turning heat off.'.format(self.temperature))
                 self.off()
+
                 # reset mode to normal heat
                 if self._boost_heat:
-                    self.mode = HVAC.HEAT
+                    self.boost_heat(False)
+
             elif self.mode == 'cool' and self.temperature < self.set_point_cool - self.set_point_tolerance:
                 # turn hvac off
                 logging.info('Temperature is {}. Turning cool off.'.format(self.temperature))
                 self.off()
 
             # should system boost heating with aux heat?
+            logging.debug("Checking temperature rate of change...current rate = {}, min rate = {}".format(self.temperature_rate_of_change, self.minimum_temp_rate_of_change))
             if self.mode == HVAC.HEAT and self.temperature_rate_of_change <= self.minimum_temp_rate_of_change:
-                self.boost_heat()
+                self.boost_heat(True)
 
         else:
             if self.mode == 'heat' and self.temperature < self.set_point_heat - self.set_point_tolerance:
@@ -338,11 +365,20 @@ class HestiaPi(Sensor):
         else:
             logging.warn("Did not deactivate {}.".format(self.mode))
 
-    def boost_heat(self):
+    def boost_heat(self, boost):
         # manually switching to AUX heat since we don't want to trigger state or mode safety checks.
-        self.mode = HVAC.AUX
-        self.set_state(self.mode, HVAC.ON)
-        self._boost_heat = True
+        # self.mode = HVAC.AUX
+        if boost == HVAC.ON:
+            self.set_state(HVAC.BOOST, HVAC.ON)
+            logging.info('Heat boost activated.')
+            self._boosting_start_time = pendulum.now()
+        else:
+            self.set_state(self.mode, HVAC.OFF)
+            logging.info('Heat boost deactivated.')
+            self._boosting_start_time = None
+        self._boosting_heat = boost
+
+    
 
     def mqtt_set_temperature_set_point_callback(self, client, userdata, message):
         try:
@@ -360,16 +396,26 @@ class HestiaPi(Sensor):
     def mqtt_set_fan_state_callback(self, fan_state):
         pass
 
-    def mqtt_set_mode_callback(self, mode):
+    def mqtt_set_mode_callback(self, client, userdata, message):
         try:
             logging.info("Received HVAC mode update request: {}".format(message))
-            payload = message.payload.decode()
-            self.mode(payload)
+            payload = message.payload.decode().lower()
+            self.set_mode(payload)
         except Exception as e:
             logging.error('Unable to proces message.', e)
 
         mqtt.publish(self.topic, self.payload())
 
+    def mqtt_set_aux_mode_callback(self, client, userdata, message):
+        try:
+            logging.info("Received Aaux mode update request: {}".format(message))
+            payload = message.payload.decode().lower()
+            # self.mode(payload)
+            self.boost_heat(payload)
+        except Exception as e:
+            logging.error('Unable to proces message.', e)
+
+        mqtt.publish(self.topic, self.payload())
 
 
 

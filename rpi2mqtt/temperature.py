@@ -83,7 +83,7 @@ class DHT(object):
         # return json.dumps(self.state())
         return self.state()
 
-    def callback(self):
+    def callback(self, **kwargs):
         mqtt.publish(self.topic, self.payload())
 
 

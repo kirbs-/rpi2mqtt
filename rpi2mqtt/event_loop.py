@@ -63,17 +63,15 @@ def main():
         while True:
 
             for sensor in sensor_list:
-                # if type(sensor) == Switch:
-                #     sensor.callback('a', 'b', {'payload': 'n/a'})
-                # else:
                 sensor.callback()
 
             time.sleep(300)
 
     except:
         traceback.print_exc()
-        scanner.stop()
         mqtt.client.loop_stop()
+        if scanner:
+            scanner.stop()
 
 
 if __name__ == '__main__':
