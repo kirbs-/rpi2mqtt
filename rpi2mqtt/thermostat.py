@@ -253,14 +253,19 @@ class HestiaPi(Sensor):
     @property
     def temperature(self):
         temp = self.bme280.state()['temperature']
-        self.temperature_history.insert(0, temp)
-        if len(self.temperature_history) > 3: # how many readings should we keep track of. 4 is ~20 minutes.
-            self.temperature_history.pop()
+
+        # if system is active log temperature changes for analysis
+        if self.active:
+            self.temperature_history.insert(0, temp)
+            logging.debug('Temperature history = {}'.format(self.temperature_history))
+            if len(self.temperature_history) > 3: # how many readings should we keep track of. 4 is ~20 minutes.
+                self.temperature_history.pop()
+
         return temp
 
     @property
     def temperature_rate_of_change(self):
-        if len(self.temperature_history) > 3:
+        if len(self.temperature_history) > 1:
             roc = math.rate_of_chage(self.temperature_history)
             logging.debug('Temperature rate of change is {}.'.format(roc))
             return roc
@@ -296,7 +301,7 @@ class HestiaPi(Sensor):
                 self.off()
 
                 # reset mode to normal heat
-                if self._boost_heat:
+                if self._boosting_heat:
                     self.boost_heat(False)
 
             elif self.mode == 'cool' and self.temperature < self.set_point_cool - self.set_point_tolerance:
@@ -376,7 +381,9 @@ class HestiaPi(Sensor):
         else:
             self.set_state(self.mode, HVAC.OFF)
             logging.info('Heat boost deactivated.')
+            # reset boost metadata
             self._boosting_start_time = None
+            self.temperature_rate_of_change = []
         self._boosting_heat = boost
 
     
