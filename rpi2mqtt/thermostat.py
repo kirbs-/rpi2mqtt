@@ -253,7 +253,7 @@ class HestiaPi(Sensor):
     @property
     def temperature(self):
         temp = self.bme280.state()['temperature']
-        self.temperature_history(0, temp)
+        self.temperature_history.insert(0, temp)
         if len(self.temperature_history) > 3: # how many readings should we keep track of. 4 is ~20 minutes.
             self.temperature_history.pop()
 
