@@ -306,7 +306,7 @@ class HestiaPi(Sensor):
 
             # should system boost heating with aux heat?
             logging.debug("Checking temperature rate of change...current rate = {}, min rate = {}".format(self.temperature_rate_of_change, self.minimum_temp_rate_of_change))
-            if self.mode == HVAC.HEAT and self.temperature_rate_of_change <= self.minimum_temp_rate_of_change:
+            if self.mode == HVAC.HEAT and self.temperature_rate_of_change and self.temperature_rate_of_change <= self.minimum_temp_rate_of_change:
                 self.boost_heat(True)
 
         else:

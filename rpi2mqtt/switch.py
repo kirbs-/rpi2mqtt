@@ -116,7 +116,7 @@ class Switch(Sensor):
         mqtt.subscribe(self.homeassistant_mqtt_config['command_topic'], self.mqtt_callback)
 
     def setup_output(self):
-        logging.info("Setting pins {} to ouptut.".format(self.pin))
+        logging.debug("Setting pins {} to ouptut.".format(self.pin))
         g.setup(self.pin, g.OUT, initial=g.LOW)
 
     def on(self):
