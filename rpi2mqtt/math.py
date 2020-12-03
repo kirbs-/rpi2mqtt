@@ -66,6 +66,6 @@ def matrix_subtraction(A, B):
  
     return C
 
-    def rate_of_change(series):
-        res = matrix_subtraction(series[1:], [series[0:-1]])
-        return sum(res[0])/len(res[0])
+def rate_of_change(series):
+    res = matrix_subtraction(series[1:], [series[0:-1]])
+    return sum(res[0])/len(res[0])
