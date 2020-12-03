@@ -302,7 +302,7 @@ class HestiaPi(Sensor):
 
                 # reset mode to normal heat
                 if self._boosting_heat:
-                    self.boost_heat(False)
+                    self.boost_heat(HVAC.OFF)
 
             elif self.mode == 'cool' and self.temperature < self.set_point_cool - self.set_point_tolerance:
                 # turn hvac off
@@ -312,7 +312,7 @@ class HestiaPi(Sensor):
             # should system boost heating with aux heat?
             logging.debug("Checking temperature rate of change...current rate = {}, min rate = {}".format(self.temperature_rate_of_change, self.minimum_temp_rate_of_change))
             if self.mode == HVAC.HEAT and self.temperature_rate_of_change and self.temperature_rate_of_change <= self.minimum_temp_rate_of_change:
-                self.boost_heat(True)
+                self.boost_heat(HVAC.ON)
 
         else:
             if self.mode == 'heat' and self.temperature < self.set_point_heat - self.set_point_tolerance:
@@ -375,15 +375,15 @@ class HestiaPi(Sensor):
         # manually switching to AUX heat since we don't want to trigger state or mode safety checks.
         # self.mode = HVAC.AUX
         if boost == HVAC.ON:
-            self.set_state(HVAC.BOOST, HVAC.ON)
+            # self.set_state(HVAC.BOOST, HVAC.ON)
             logging.info('Heat boost activated.')
             self._boosting_start_time = pendulum.now()
         else:
-            self.set_state(self.mode, HVAC.OFF)
+            # self.set_state(self.mode, HVAC.OFF)
             logging.info('Heat boost deactivated.')
             # reset boost metadata
             self._boosting_start_time = None
-            self.temperature_rate_of_change = []
+            self.temperature_history = []
         self._boosting_heat = boost
 
     
