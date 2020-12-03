@@ -266,7 +266,7 @@ class HestiaPi(Sensor):
     @property
     def temperature_rate_of_change(self):
         if len(self.temperature_history) > 1:
-            roc = math.rate_of_chage(self.temperature_history)
+            roc = math.rate_of_change(self.temperature_history)
             logging.debug('Temperature rate of change is {}.'.format(roc))
             return roc
 
