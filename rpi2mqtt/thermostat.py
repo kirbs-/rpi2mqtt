@@ -266,10 +266,10 @@ class HestiaPi(Sensor):
         """Save current temperature in _temperature history and maintain N readings."""
          # if system is active log temperature changes for analysis
         if self.active:
-            self.temperature_history.insert(0, self.temperature)
+            self.temperature_history.append(self.temperature)
             logging.debug('Temperature history = {}'.format(self.temperature_history))
             if len(self.temperature_history) > 3: # how many readings should we keep track of. 4 is ~20 minutes.
-                self.temperature_history.pop()
+                self.temperature_history.pop(0)
 
     @property
     def temperature_rate_of_change(self):
