@@ -35,7 +35,7 @@ class HVAC(object):
     AUX = 'aux'
     EMERGENCY = 'emergency'
     BOOST = 'boost'
-    FAN = 'fan'
+    FAN = 'high'
     AUTO = 'auto'
     ON = 'on'
     OFF = 'off'
@@ -384,11 +384,11 @@ class HestiaPi(Sensor):
 
     def fan_on(self):
         self.set_state(HVAC.FAN, HVAC.ON)
-        logging.info('Turned fan off.')
+        logging.info('Turned fan on.')
 
     def fan_off(self):
         self.set_state(HVAC.FAN, HVAC.OFF)
-        logging.info('Turned fan on.')
+        logging.info('Turned fan off.')
 
     def set_fan_mode(self, fan_mode):
         logging.info('Setting fan mode to {}.'.format(fan_mode))
