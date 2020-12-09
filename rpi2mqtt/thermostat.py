@@ -392,6 +392,10 @@ class HestiaPi(Sensor):
 
     def set_fan_mode(self, fan_mode):
         logging.info('Setting fan mode to {}.'.format(fan_mode))
+        if fan_mode == 'high':
+            self.fan_on()
+        else:
+            self.fan_off()
 
     def boost_heat(self, boost):
         # manually switching to AUX heat since we don't want to trigger state or mode safety checks.
