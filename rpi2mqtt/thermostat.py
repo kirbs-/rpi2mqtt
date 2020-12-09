@@ -35,7 +35,7 @@ class HVAC(object):
     AUX = 'aux'
     EMERGENCY = 'emergency'
     BOOST = 'boost'
-    FAN = 'high'
+    FAN = 'fan'
     AUTO = 'auto'
     ON = 'on'
     OFF = 'off'
