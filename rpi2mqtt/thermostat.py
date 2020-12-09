@@ -36,6 +36,7 @@ class HVAC(object):
     EMERGENCY = 'emergency'
     BOOST = 'boost'
     FAN = 'fan'
+    FAN_ON = 'high'
     AUTO = 'auto'
     ON = 'on'
     OFF = 'off'
@@ -242,7 +243,7 @@ class HestiaPi(Sensor):
     @property
     def fan_state(self):
         if self.hvac_state == HVAC.FAN:
-            return HVAC.FAN
+            return HVAC.FAN_ON
         else:
             return HVAC.AUTO
 
@@ -392,7 +393,7 @@ class HestiaPi(Sensor):
 
     def set_fan_mode(self, fan_mode):
         logging.info('Setting fan mode to {}.'.format(fan_mode))
-        if fan_mode == 'high':
+        if fan_mode == HVAC.FAN_ON:
             self.fan_on()
         else:
             self.fan_off()
