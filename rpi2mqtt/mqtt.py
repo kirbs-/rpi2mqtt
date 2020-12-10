@@ -14,7 +14,7 @@ subscribed_topics = {}
 
 def publish(topic, payload, cnt=1):
     try:
-        logging.debug("Pushlishing to topic {}: | attempt: {} | message: {}".format(topic, cnt, payload))
+        logging.info("Pushlishing to topic {}: | attempt: {} | message: {}".format(topic, cnt, payload))
         if cnt <= config.mqtt.retries:
             mqtt.single(topic, payload, 
                         hostname=config.mqtt.host, 
