@@ -156,7 +156,8 @@ class HestiaPi(Sensor):
     def set_state(self, mode, state):
         if not self.dry_run:
             if state == HVAC.ON:
-                self.active_start_time = pendulum.now()
+                if mode not in [HVAC.FAN, HVAC.BOOST]:
+                    self.active_start_time = pendulum.now()
                 self._modes[mode].on()
 
                 # confirm mode change
@@ -167,8 +168,9 @@ class HestiaPi(Sensor):
 
             elif state == HVAC.OFF:
                 self._modes[mode].off()
-                self.active_start_time = None
-                self.temperature_history = []
+                if mode not in [HVAC.FAN, HVAC.BOOST]:
+                    self.active_start_time = None
+                    self.temperature_history = []
 
                 # confirm mode change
                 if 'off' == self.hvac_state:
@@ -177,8 +179,8 @@ class HestiaPi(Sensor):
                     logging.warn('Did not set HVAC state to {}. Try again.'.format(mode))
             else:
                 raise HvacException("State '{}' is not a valid state.".format(state))
-        
-        self.last_hvac_state_change_time = pendulum.now()
+        if mode not in [HVAC.FAN, HVAC.BOOST]:
+            self.last_hvac_state_change_time = pendulum.now()
 
     @property
     def active_time(self):
@@ -252,6 +254,8 @@ class HestiaPi(Sensor):
         state = self.hvac_state
         if state in ['heat','cool']:
             return '{}ing'.format(state)
+        elif state == HVAC.AUX:
+            return 'heating'
         else:
             return state
 
@@ -463,7 +467,7 @@ class HestiaPi(Sensor):
     def mqtt_set_aux_mode_callback(self, client, userdata, message):
         try:
             payload = message.payload.decode().lower()
-            logging.info("Received Aaux mode update request: {}".format(payload))
+            logging.info("Received aux mode update request: {}".format(payload))
             # self.mode(payload)
             self.boost_heat(payload)
         except Exception as e:
