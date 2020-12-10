@@ -72,7 +72,7 @@ class HestiaPi(Sensor):
         # container to store temperature history
         self.temperature_history = []
         # Minimum temperature rate of change over 4 measurements
-        self.minimum_temp_rate_of_change = .15
+        self.minimum_temp_rate_of_change = .05
         # super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
         # put thermostat into test mode. i.e. don't trigger HVAC commands
         self.dry_run = kwargs.get('dry_run')
@@ -380,6 +380,7 @@ class HestiaPi(Sensor):
     def off(self):
         if self._can_change_hvac_state():
             self.set_state(self.mode, HVAC.OFF)
+            self.temperature_history = []
         else:
             logging.warn("Did not deactivate {}.".format(self.mode))
 
@@ -390,6 +391,16 @@ class HestiaPi(Sensor):
     def fan_off(self):
         self.set_state(HVAC.FAN, HVAC.OFF)
         logging.info('Turned fan off.')
+
+    def heat_boost_on(self):
+        self.set_state(HVAC.BOOST, HVAC.ON)
+        self._boosting_heat = HVAC.ON
+        logging.info('Heat boost activated.')
+
+    def heat_boost_off(self):
+        self.set_state(HVAC.BOOST, HVAC.OFF)
+        self._boosting_heat = HVAC.OFF
+        logging.info('Heat boost deactivated.')
 
     def set_fan_mode(self, fan_mode):
         logging.info('Setting fan mode to {}.'.format(fan_mode))
@@ -402,17 +413,15 @@ class HestiaPi(Sensor):
         # manually switching to AUX heat since we don't want to trigger state or mode safety checks.
         # self.mode = HVAC.AUX
         if boost == HVAC.ON:
-            # self.set_state(HVAC.BOOST, HVAC.ON)
-            logging.info('Heat boost activated.')
+            self.heat_boost_on()
             self._boosting_start_time = pendulum.now()
-            self._boosting_heat = HVAC.ON
+            # self._boosting_heat = HVAC.ON
         elif boost == HVAC.OFF:
-            # self.set_state(self.mode, HVAC.OFF)
-            logging.info('Heat boost deactivated.')
+            self.heat_boost_off()
             # reset boost metadata
             self._boosting_start_time = None
-            self.temperature_history = []
-            self._boosting_heat = HVAC.OFF
+            # self.temperature_history = []
+            # self._boosting_heat = HVAC.OFF
         else:
             raise HvacException('{} is not a valid boost value. allowed values are [[{},{}]'.format(boost, HVAC.ON, HVAC.OFF))
         # self._boosting_heat = boost
