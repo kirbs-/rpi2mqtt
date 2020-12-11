@@ -288,7 +288,7 @@ class HestiaPi(Sensor):
         return {
             'bme280': data,
             'mode': self.mode,
-            'aux_mode': self._boosting_heat.upper(),
+            'aux_mode': self._boosting_heat,
             'active_time': self.active_time,
             'aux_active_time': self.boosting_active_time,
             'active': self.active,
