@@ -77,7 +77,7 @@ class HestiaPi(Sensor):
         # put thermostat into test mode. i.e. don't trigger HVAC commands
         self.dry_run = kwargs.get('dry_run')
         # save boost state
-        self._boosting_heat = False
+        self._boosting_heat = HVAC.OFF
         self._boosting_start_time = None
 
         self.setup()
@@ -145,7 +145,7 @@ class HestiaPi(Sensor):
                 'temperature_state_template': '{{ value_json.set_point }}',
                 'temperature_command_topic': self.temperature_set_point_command_topic,
                 'aux_state_topic': self.topic,
-                'aux_state_topic': '{{ value_json.aux_mode }}',
+                'aux_state_topic': '{{ value_json.aux_mode }}', # TODO refactor aux_mode to aux_state
                 'aux_command_topic': self.aux_command_topic,
                 'fan_modes': ['auto', 'high'],
                 'fan_mode_state_topic': self.topic,
@@ -161,7 +161,7 @@ class HestiaPi(Sensor):
                 self._modes[mode].on()
 
                 # confirm mode change
-                if mode == self.hvac_state:
+                if mode == self.hvac_state: # TODO if boosting then only check boosting pin is active
                     logging.debug('Turned {} {}.'.format(mode, state))
                 else:
                     logging.warn('Did not set HVAC state to {}. Try again.'.format(mode))
