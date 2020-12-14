@@ -19,6 +19,7 @@ class BasicSwitch(Sensor):
         self.power_state = 'OFF'
         self.last_seen = datetime.now()
         # self.setup()
+        g.setmode(g.BCM)
 
     def setup(self, lazy_setup=True):
         """
