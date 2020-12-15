@@ -110,7 +110,7 @@ class Switch(Sensor):
         # setup GPIO
         g.setmode(g.BCM)
         if not type(self.pin) == list:
-            self.pin = list(self.pin)
+            self.pin = [self.pin]
         # for pin in self.pin:
         if not lazy_setup:
             self.setup_output()
