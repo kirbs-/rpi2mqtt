@@ -91,7 +91,7 @@ class Switch(Sensor):
         super(Switch, self).__init__(name, pin, topic, device_class, device_type)
         self.power_state = 'OFF'
         self.last_seen = datetime.now()
-        # self.setup()
+        self.setup()
 
 
     @property
