@@ -2,6 +2,7 @@ import rpi2mqtt.mqtt as mqtt
 import json
 import logging
 from rpi2mqtt.version import __version__
+import RPi.GPIO as GPIO
 
 # logging.basicConfig(level=logging.INFO)
 
@@ -15,6 +16,7 @@ def sensor(func):
             SENSORS[args.name].append(func)
     return wrap
 
+GPIO.setmode(GPIO.BCM)
 
 class Sensor(object):
 
@@ -27,6 +29,7 @@ class Sensor(object):
         self.device_class = device_class
         self.device_model = device_model
         self.publish_mqtt_discovery()
+        
 
     @property
     def device_config(self):
