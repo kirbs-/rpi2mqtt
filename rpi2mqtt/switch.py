@@ -29,8 +29,11 @@ class BasicSwitch(Sensor):
         # setup GPIO
         g.setmode(g.BCM)
         if not type(self.pin) == list:
-            self.pin = list(self.pin)
-        # for pin in self.pin:
+            self.pin = [self.pin]
+            
+        for pin in self.pin:
+            g.setup(pin, g.IN)
+        
         if not lazy_setup:
             self.setup_output()
 
