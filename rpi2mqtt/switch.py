@@ -30,7 +30,7 @@ class BasicSwitch(Sensor):
         g.setmode(g.BCM)
         if not type(self.pin) == list:
             self.pin = [self.pin]
-            
+
         for pin in self.pin:
             g.setup(pin, g.IN)
         
@@ -114,6 +114,10 @@ class Switch(Sensor):
         g.setmode(g.BCM)
         if not type(self.pin) == list:
             self.pin = [self.pin]
+
+        for pin in self.pin:
+            g.setup(pin, g.IN)
+
         # for pin in self.pin:
         if not lazy_setup:
             self.setup_output()
