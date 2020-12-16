@@ -153,7 +153,10 @@ class Switch(Sensor):
 
     def state(self):
         # read output pin state
-        pin_state = g.input(self.pin)
+        # TODO refactor switch into single pin & multi pin classes
+        pin_state = 0
+        for _pin in self.pin:
+            pin_state += g.input(_pin)
 
         # convert to home assistant on/off state defaults
         # https://www.home-assistant.io/integrations/switch.mqtt/#state_on
