@@ -38,11 +38,17 @@ class DHT(object):
 
     @property
     def temperature_C(self):
-        return round(self.temperature, 1)
+        try:
+            return round(self.temperature, 1)
+        except:
+            pass
 
     @property
     def _humidity(self):
-        return round(self.humidity, 3)
+        try:
+            return round(self.humidity, 3)
+        except:
+            pass
 
     def setup(self):
         # config = json.dumps({'name': self.name, 'device_class': self.device_class})
