@@ -4,9 +4,11 @@ import json
 import rpi2mqtt.mqtt as mqtt
 from rpi2mqtt.base import Sensor, SensorGroup, sensor
 import logging
-
+import os
+import glob
 import smbus2
 import bme280
+import re
 
 
 class DHT(object):
@@ -34,7 +36,7 @@ class DHT(object):
         try:
             return round(self.temperature_C * 1.8 + 32.0, 1)
         except:
-            return None
+            return pass
 
     @property
     def temperature_C(self):
@@ -182,3 +184,53 @@ class BME280(SensorGroup):
 
     def payload(self):
         return json.dumps(self.state())
+
+
+class OneWire(Sensor):
+    """Must enable one wire interface on Raspberry Pi and load modprobe w1-gpio and w1-therm drivers."""
+    BASE_DIR = '/sys/bus/w1/devices/'
+    # These tow lines mount the device:
+    os.system('modprobe w1-gpio')
+    os.system('modprobe w1-therm')
+
+    TEMP_REGEX = re.compile('.*? t=(\d*)')
+
+    def __init__(self, name, pin, topic, device_class, device_model, **kwargs):
+        super(OneWire, self).init(name, pin, topic, device_class, device_model, **kwargs)
+        self.devices = {}
+        self.temperature = None
+
+    def setup(self):
+        for device in glob.glob( OneWire.BASE_DIR + '**/w1_slave'):
+            w1_id = device.split()[-2]
+            self.devices[w1_id] = device
+        return True
+
+    def state(self):
+        for device, filename in self.devices.items():
+            with open(filename, 'r') as f:
+                self.temperature = OneWire.parse_one_wire_file(device, f.read())
+
+            return {'temperature': self.temperature_F()}
+    
+    @property
+    def temperature_F(self):
+        try:
+            return round(self.temperature * 1.8 + 32.0, 1)
+        except:
+            pass
+
+    @property
+    def temperature_C(self):
+        try:
+            return round(self.temperature, 1)
+        except:
+            pass
+
+    @classmethod
+    def parse_one_wire_file(device, text):
+        match = OneWire.TEMP_REGEX.search(text):
+        if text:
+            return match.groups()[0]
+        else:
+            logging.warn('Unable to parse temperature for one wire device {}.'.format(device))
