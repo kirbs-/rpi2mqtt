@@ -48,6 +48,8 @@ def main():
             s = BME280(sensor.name, sensor.topic)
         elif sensor.type == 'hestiapi':
             s = HestiaPi(sensor.name, sensor.topic, sensor.heat_setpoint, sensor.cool_setpoint, dry_run=args.dry_run)
+        elif sensor.type == 'onewire':
+            s = OneWire(sensor.name, sensor.topic)
         else:
             logging.warn('Sensor {} found in config, but was not setup.'.format(sensor.name))
         if s:

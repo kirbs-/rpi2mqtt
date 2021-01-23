@@ -36,7 +36,7 @@ class DHT(object):
         try:
             return round(self.temperature_C * 1.8 + 32.0, 1)
         except:
-            return pass
+            pass
 
     @property
     def temperature_C(self):
@@ -195,10 +195,11 @@ class OneWire(Sensor):
 
     TEMP_REGEX = re.compile('.*? t=(\d*)')
 
-    def __init__(self, name, pin, topic, device_class, device_model, **kwargs):
-        super(OneWire, self).init(name, pin, topic, device_class, device_model, **kwargs)
+    def __init__(self, name, topic, **kwargs):
         self.devices = {}
         self.temperature = None
+        self.setup()
+        super(OneWire, self).init(name, None, topic, 'temperature', 'One wire', **kwargs)
 
     def setup(self):
         for device in glob.glob( OneWire.BASE_DIR + '**/w1_slave'):
@@ -229,7 +230,7 @@ class OneWire(Sensor):
 
     @classmethod
     def parse_one_wire_file(device, text):
-        match = OneWire.TEMP_REGEX.search(text):
+        match = OneWire.TEMP_REGEX.search(text)
         if text:
             return match.groups()[0]
         else:
