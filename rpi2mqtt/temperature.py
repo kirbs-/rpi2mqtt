@@ -212,7 +212,7 @@ class OneWire(Sensor):
             with open(filename, 'r') as f:
                 self.temperature = OneWire.parse_one_wire_file(device, f.read())
 
-            return {'temperature': self.temperature_F}
+            return self.temperature_F
     
     @property
     def temperature_F(self):
