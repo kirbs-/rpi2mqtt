@@ -11,7 +11,10 @@ from rpi2mqtt.switch import Switch
 from rpi2mqtt.thermostat import HestiaPi
 import time
 import rpi2mqtt.mqtt as mqtt
-from beacontools import BeaconScanner, IBeaconFilter
+try:
+    from beacontools import BeaconScanner, IBeaconFilter
+except:
+    print("Unable to load beacontools")
 import traceback
 import argparse
 
