@@ -203,7 +203,7 @@ class OneWire(Sensor):
 
     def setup(self):
         for device in glob.glob( OneWire.BASE_DIR + '**/w1_slave'):
-            w1_id = device.split()[-2]
+            w1_id = device.split('/')[-2]
             self.devices[w1_id] = device
         return True
 
