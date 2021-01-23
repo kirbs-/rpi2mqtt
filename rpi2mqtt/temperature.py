@@ -199,7 +199,7 @@ class OneWire(Sensor):
         self.devices = {}
         self.temperature = None
         self.setup()
-        super(OneWire, self).init(name, None, topic, 'temperature', 'One wire', **kwargs)
+        super(OneWire, self).__init__(name, None, topic, 'temperature', 'One wire', **kwargs)
 
     def setup(self):
         for device in glob.glob( OneWire.BASE_DIR + '**/w1_slave'):
