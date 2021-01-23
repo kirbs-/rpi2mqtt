@@ -228,7 +228,7 @@ class OneWire(Sensor):
         except:
             pass
 
-    @classmethod
+    @staticmethod
     def parse_one_wire_file(device, text):
         match = OneWire.TEMP_REGEX.search(text)
         if text:
