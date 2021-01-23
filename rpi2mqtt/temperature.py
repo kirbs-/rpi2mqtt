@@ -212,7 +212,7 @@ class OneWire(Sensor):
             with open(filename, 'r') as f:
                 self.temperature = OneWire.parse_one_wire_file(device, f.read())
 
-            return {'temperature': self.temperature_F()}
+            return {'temperature': self.temperature_F}
     
     @property
     def temperature_F(self):
@@ -232,6 +232,6 @@ class OneWire(Sensor):
     def parse_one_wire_file(device, text):
         match = OneWire.TEMP_REGEX.search(text)
         if text:
-            return match.groups()[0]
+            return float(match.groups()[0]) / 1000.0
         else:
             logging.warn('Unable to parse temperature for one wire device {}.'.format(device))
