@@ -30,6 +30,8 @@ parser.add_argument('-d', '--dry-run', help='Test drive config without triggerin
 def main():
     args = parser.parse_args() 
 
+    scanner = None
+
     if args.config:
         save(args.config)
 
@@ -39,6 +41,7 @@ def main():
     sensor_list = []
 
     for sensor in config.sensors:
+        s = None
         if sensor.type == 'dht22':
             s = DHT(sensor.pin, sensor.topic, sensor.name, 'sensor', sensor.type)
         elif sensor.type == 'ibeacon':
