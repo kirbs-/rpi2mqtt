@@ -32,4 +32,7 @@ def save(filename):
             w.write(f.read())
     return load()
 
-load()
+try:
+    load()
+except FileNotFoundError as e:
+    logging.error("No confiuration file specified. Run `rpi2mqtt --init` to generate configuration template.")
