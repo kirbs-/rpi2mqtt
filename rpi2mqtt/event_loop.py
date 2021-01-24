@@ -11,12 +11,15 @@ from rpi2mqtt.switch import Switch
 from rpi2mqtt.thermostat import HestiaPi
 import time
 import rpi2mqtt.mqtt as mqtt
+
 try:
     from beacontools import BeaconScanner, IBeaconFilter
 except:
     print("Unable to load beacontools")
+
 import traceback
 import argparse
+import importlib
 
 
 # setup CLI parser
@@ -24,7 +27,15 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--config",
                 help="Path to config.yaml")
 
-parser.add_argument('-d', '--dry-run', help='Test drive config without triggering callbacks.')
+parser.add_argument('-d', '--dry-run', 
+                help='Test drive config without triggering callbacks.')
+
+parser.add_argument('-g', '--generate-config',
+                help="Generate config.yaml template.")
+
+parser.add_argument('-i', '--install-service',
+                help='Install rpi2mqtt as systemd service.')
+
 
 
 def main():
@@ -33,7 +44,8 @@ def main():
     scanner = None
 
     if args.config:
-        save(args.config)
+        config = save(args.config)
+        importlib.reload(mqtt)
 
     # start MQTT client
     mqtt.setup()

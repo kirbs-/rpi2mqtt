@@ -23,6 +23,7 @@ def load():
         config = DotMap(yaml.safe_load(f))
         config_filename = pathlib.Path(f.name).absolute()
         logging.info("Loaded config file {}".format(config_filename))
+    return config
 
 
 def save(filename):
