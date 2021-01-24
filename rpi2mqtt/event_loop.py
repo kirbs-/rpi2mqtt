@@ -1,9 +1,12 @@
 # import asyncio
 import logging
+import traceback
+import argparse
+import importlib
 import sys
-logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(asctime)s:%(levelname)s:%(message)s')
+# logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(asctime)s:%(levelname)s:%(message)s')
 
-from rpi2mqtt.config import config, save
+from rpi2mqtt.config import config, save, generate_config
 from rpi2mqtt.binary import *
 from rpi2mqtt.temperature import *
 from rpi2mqtt.ibeacon import Scanner
@@ -16,10 +19,6 @@ try:
     from beacontools import BeaconScanner, IBeaconFilter
 except:
     print("Unable to load beacontools")
-
-import traceback
-import argparse
-import importlib
 
 
 # setup CLI parser
@@ -37,10 +36,7 @@ parser.add_argument('-i', '--install-service',
                 help='Install rpi2mqtt as systemd service.')
 
 
-
 def main():
-    args = parser.parse_args() 
-
     scanner = None
 
     if args.config:
@@ -74,7 +70,7 @@ def main():
             sensor_list.append(s)
 
     try:
-        scanner = BeaconScanner(sensor_list[1].process_ble_update)
+        scanner = BeaconScanner(sensor_list[1].process_ble_update) # TODO update to search sensor list and setup scanner accordingly.
         scanner.start()
     except:
         logging.error("Beacon scanner did not start")
@@ -85,14 +81,22 @@ def main():
             for sensor in sensor_list:
                 sensor.callback()
 
-            time.sleep(300)
+            time.sleep(config.polling_interval)
 
     except:
         traceback.print_exc()
         mqtt.client.loop_stop()
+
         if scanner:
             scanner.stop()
 
 
 if __name__ == '__main__':
+    args = parser.parse_args() 
+
+    if args.generate_config:
+        generate_config('config.yaml')
+        sys.exit(0)
+
+    
     main()
