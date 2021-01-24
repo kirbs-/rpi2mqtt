@@ -91,6 +91,24 @@ def main():
             scanner.stop()
 
 
+def install_service(username, _path):
+    template = """[Unit]
+Description=rpi2mqtt Service
+After=network-online.target
+
+[Service]
+# replace user with an existing system user
+Restart=on-failure
+User={username}
+ExecStart={_path}
+
+[Install]
+WantedBy=multi-user.target
+    """.format(username=username, _path=_path)
+
+    with open('/etc/systemd/system/rpi2mqtt.service', 'w') as f:
+        f.write(template)
+
 if __name__ == '__main__':
     args = parser.parse_args() 
 
@@ -98,5 +116,9 @@ if __name__ == '__main__':
         generate_config('config.yaml')
         sys.exit(0)
 
+    if args.install_service:
+        username = input("User to run service as: ")
+        _path = input("Path rpi2mqtt executable (run `which rpi2mqtt`")
+        install_service(username, _path)
     
     main()
