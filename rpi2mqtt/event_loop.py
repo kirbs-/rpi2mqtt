@@ -46,8 +46,9 @@ def main():
         sys.exit(0)
 
     if args.install_service:
-        username = input("User to run service as: ")
-        _path = input("Path rpi2mqtt executable (run `which rpi2mqtt`): ")
+        username = input("User to run service as [pi]: ") or 'pi'
+        # _path = input("Path rpi2mqtt executable (run `which rpi2mqtt`): ")
+        _path = sys.check_output(['which', 'rpi2mqtt']).decode().strip()
         print(install_service(username, _path))
         sys.exit(0)
 
