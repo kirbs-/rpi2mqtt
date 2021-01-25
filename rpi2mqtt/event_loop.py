@@ -29,11 +29,13 @@ parser.add_argument("-c", "--config",
 parser.add_argument('-d', '--dry-run', 
                 help='Test drive config without triggering callbacks.')
 
-parser.add_argument('-g', '--generate-config',
-                help="Generate config.yaml template.")
+parser.add_argument('--generate-config',
+                help="Generate config.yaml template.",
+                action='store_true')
 
-parser.add_argument('-i', '--install-service',
-                help='Install rpi2mqtt as systemd service.')
+parser.add_argument('--install-service',
+                help='Install rpi2mqtt as systemd service.',
+                action='store_true')
 
 
 def main():

@@ -2,10 +2,10 @@
 from setuptools import setup, find_packages
 # from setuptools.command.install import install as _install
 # To use a consistent encoding
-from codecs import open
-from os import path
-import sys
-import os
+# from codecs import open
+# from os import path
+# import sys
+# import os
 
 # Get the long description from the relevant file
 # with open('README.rst', encoding='utf-8') as f:
@@ -17,7 +17,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.3.0',
+    version='0.3.1',
 
     # description='A Jupyter notebook extension to hide code, prompts and outputs.',
     # long_description=long_description,
@@ -56,7 +56,7 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='raspberrypi mqtt GPIO home automation',
+    keywords='raspberrypi mqtt GPIO home_automation home_assistant',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
