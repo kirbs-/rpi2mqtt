@@ -119,9 +119,9 @@ ExecStart={_path}
 [Install]
 WantedBy=multi-user.target
     """.format(username=username, _path=_path)
-
-    with open('/etc/systemd/user/rpi2mqtt.service', 'w') as f:
-        f.write(template)
+    return template
+    # with open('/etc/systemd/user/rpi2mqtt.service', 'w') as f:
+    #     f.write(template)
 
 if __name__ == '__main__':
     main()
