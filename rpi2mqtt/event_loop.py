@@ -3,6 +3,7 @@ import logging
 import traceback
 import argparse
 import importlib
+import subprocess
 import sys
 # logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(asctime)s:%(levelname)s:%(message)s')
 
@@ -48,7 +49,7 @@ def main():
     if args.install_service:
         username = input("User to run service as [pi]: ") or 'pi'
         # _path = input("Path rpi2mqtt executable (run `which rpi2mqtt`): ")
-        _path = sys.check_output(['which', 'rpi2mqtt']).decode().strip()
+        _path = subprocess.check_output(['which', 'rpi2mqtt']).decode().strip()
         print(install_service(username, _path))
         sys.exit(0)
 
