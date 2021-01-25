@@ -39,6 +39,18 @@ parser.add_argument('--install-service',
 
 
 def main():
+    args = parser.parse_args() 
+
+    if args.generate_config:
+        generate_config('config.yaml')
+        sys.exit(0)
+
+    if args.install_service:
+        username = input("User to run service as: ")
+        _path = input("Path rpi2mqtt executable (run `which rpi2mqtt`): ")
+        print(install_service(username, _path))
+        sys.exit(0)
+
     scanner = None
 
     if args.config:
@@ -108,19 +120,8 @@ ExecStart={_path}
 WantedBy=multi-user.target
     """.format(username=username, _path=_path)
 
-    with open('/etc/systemd/system/rpi2mqtt.service', 'w') as f:
+    with open('/etc/systemd/user/rpi2mqtt.service', 'w') as f:
         f.write(template)
 
 if __name__ == '__main__':
-    args = parser.parse_args() 
-
-    if args.generate_config:
-        generate_config('config.yaml')
-        sys.exit(0)
-
-    if args.install_service:
-        username = input("User to run service as: ")
-        _path = input("Path rpi2mqtt executable (run `which rpi2mqtt`")
-        install_service(username, _path)
-    
     main()
