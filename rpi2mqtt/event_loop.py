@@ -2,19 +2,19 @@
 import logging
 import traceback
 import argparse
-import importlib
+# import importlib
 import subprocess
 import sys
 # logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(asctime)s:%(levelname)s:%(message)s')
 
-from rpi2mqtt.config import config, save, generate_config
+from rpi2mqtt.config import Config, generate_config
 from rpi2mqtt.binary import *
 from rpi2mqtt.temperature import *
 from rpi2mqtt.ibeacon import Scanner
 from rpi2mqtt.switch import Switch
 from rpi2mqtt.thermostat import HestiaPi
 import time
-import rpi2mqtt.mqtt as mqtt
+# import rpi2mqtt.mqtt as mqtt
 
 try:
     from beacontools import BeaconScanner, IBeaconFilter
@@ -40,6 +40,7 @@ parser.add_argument('--install-service',
 
 
 def main():
+    config = None
     args = parser.parse_args() 
 
     if args.generate_config:
@@ -50,14 +51,17 @@ def main():
         username = input("User to run service as [pi]: ") or 'pi'
         # _path = input("Path rpi2mqtt executable (run `which rpi2mqtt`): ")
         _path = subprocess.check_output(['which', 'rpi2mqtt']).decode().strip()
-        print(install_service(username, _path))
+        install_service(username, _path)
         sys.exit(0)
 
     scanner = None
 
     if args.config:
-        config = save(args.config)
-        importlib.reload(mqtt)
+        config = Config(args.config)
+        import rpi2mqtt.mqtt as mqtt
+
+    if not config:
+        logging.error("No configuration file present.")
 
     # start MQTT client
     mqtt.setup()

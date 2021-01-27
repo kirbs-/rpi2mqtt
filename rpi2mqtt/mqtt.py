@@ -1,16 +1,16 @@
 import paho.mqtt.publish as mqtt
 # import paho.mqtt.subscribe as mqtt_sub
 from paho.mqtt.client import Client
-from rpi2mqtt.config import config
-import traceback
+from rpi2mqtt.config import Config
+# import traceback
 import logging
-import sys
+# import sys
 
 
 # logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 client = Client()
 subscribed_topics = {}
-
+config = Config.get_instance()
 
 def publish(topic, payload, cnt=1):
     try:
