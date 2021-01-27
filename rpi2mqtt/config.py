@@ -18,7 +18,7 @@ class Config(DotMap):
     def get_instance(cls, filename=None):
         if filename:
             cls.filename = filename
-        if not cls._config:
+        if not cls._config and cls.filename:
             with open(cls.filename, 'r') as f:
                 cls._config = DotMap(yaml.safe_load(f))
                 config_filename = pathlib.Path(f.name).absolute()
