@@ -10,7 +10,7 @@ import pathlib
 
 
 # logging.getLogger().setLevel(logging.DEBUG)
-class Config(DotMap):
+class Config():
     _config = None
     _filename = None
 
