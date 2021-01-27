@@ -17,9 +17,9 @@ class Config():
     @classmethod
     def get_instance(cls, filename=None):
         if filename:
-            cls.filename = filename
+            cls._filename = filename
         if not cls._config and cls._filename:
-            with open(cls.filename, 'r') as f:
+            with open(cls._filename, 'r') as f:
                 cls._config = DotMap(yaml.safe_load(f))
                 config_filename = pathlib.Path(f.name).absolute()
                 logging.info("Loaded config file {}".format(config_filename))
