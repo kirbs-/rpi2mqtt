@@ -58,12 +58,13 @@ def main():
 
     if args.config:
         config = Config.get_instance(filename=args.config)
-        import rpi2mqtt.mqtt as mqtt
+    # import rpi2mqtt.mqtt as mqtt
 
     if not config:
         logging.error("No configuration file present.")
 
     # start MQTT client
+    import rpi2mqtt.mqtt as mqtt
     mqtt.setup()
 
     sensor_list = []
