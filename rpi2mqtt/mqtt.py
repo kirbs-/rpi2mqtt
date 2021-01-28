@@ -49,8 +49,8 @@ class MQTT():
 
         cls.client.loop_start()
 
-        cls.client.on_subscribe = Client.on_subscribe
-        cls.client.on_message = on_message
+        cls.client.on_subscribe = MQTT.on_subscribe
+        cls.client.on_message = MQTT.on_message
 
     @staticmethod
     def on_message(mqttc, obj, msg):
