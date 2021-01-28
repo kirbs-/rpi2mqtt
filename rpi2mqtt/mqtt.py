@@ -8,7 +8,7 @@ import logging
 
 
 # logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-class Client():
+class MQTT():
     
     client = None
     subscribed_topics = None
