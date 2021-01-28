@@ -10,9 +10,9 @@ import logging
 # logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 class Client():
     
-    client = Client()
-    subscribed_topics = {}
-    config = Config.get_instance()
+    client = None
+    subscribed_topics = None
+    config = None
 
     @classmethod
     def publish(cls, topic, payload, cnt=1):
@@ -32,6 +32,9 @@ class Client():
 
     @classmethod
     def setup(cls):
+        cls.client = Client()
+        cls.subscribed_topics = {}
+        cls.config = Config.get_instance()
         cls.client.tls_set(ca_certs=cls.config.mqtt.ca_cert) #, certfile=None, keyfile=None, cert_reqs=cert_required, tls_version=tlsVersion)
 
         # if args.insecure:
