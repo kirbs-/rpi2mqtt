@@ -64,8 +64,8 @@ def main():
         logging.error("No configuration file present.")
 
     # start MQTT client
-    import rpi2mqtt.mqtt as mqtt
-    mqtt.setup()
+    from rpi2mqtt.mqtt import Client
+    Client.setup()
 
     sensor_list = []
 
@@ -106,7 +106,7 @@ def main():
 
     except:
         traceback.print_exc()
-        mqtt.client.loop_stop()
+        Client.client.loop_stop()
 
         if scanner:
             scanner.stop()
