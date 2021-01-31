@@ -1,7 +1,7 @@
 # coding=utf-8
 import Adafruit_DHT as dht
 import json
-import rpi2mqtt.mqtt as mqtt
+from rpi2mqtt.mqtt import MQTT as mqtt
 from rpi2mqtt.base import Sensor, SensorGroup, sensor
 import logging
 import os

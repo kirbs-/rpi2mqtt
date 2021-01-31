@@ -1,5 +1,4 @@
 from rpi2mqtt.base import Sensor
-import rpi2mqtt.mqtt as mqtt
 import json
 from datetime import datetime, timedelta
 

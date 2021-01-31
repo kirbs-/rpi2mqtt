@@ -2,19 +2,17 @@
 import logging
 import traceback
 import argparse
-# import importlib
 import subprocess
 import sys
 # logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(asctime)s:%(levelname)s:%(message)s')
 
-from rpi2mqtt.config import Config, generate_config
+from rpi2mqtt.config import Config
 from rpi2mqtt.binary import *
 from rpi2mqtt.temperature import *
 from rpi2mqtt.ibeacon import Scanner
 from rpi2mqtt.switch import Switch
 from rpi2mqtt.thermostat import HestiaPi
 import time
-# import rpi2mqtt.mqtt as mqtt
 
 try:
     from beacontools import BeaconScanner, IBeaconFilter
@@ -44,7 +42,7 @@ def main():
     args = parser.parse_args() 
 
     if args.generate_config:
-        generate_config('config.yaml')
+        Config.generate_config('config.yaml')
         sys.exit(0)
 
     if args.install_service:
@@ -58,43 +56,45 @@ def main():
 
     if args.config:
         config = Config.get_instance(filename=args.config)
-    # import rpi2mqtt.mqtt as mqtt
 
     if not config:
         logging.error("No configuration file present.")
+        sys.exit(1)
 
     # start MQTT client
     from rpi2mqtt.mqtt import MQTT
     MQTT.setup()
 
     sensor_list = []
+    if len(config.sensors) >0:
+        for sensor in config.sensors:
+            s = None
+            if sensor.type == 'dht22':
+                s = DHT(sensor.pin, sensor.topic, sensor.name, 'sensor', sensor.type)
+            elif sensor.type == 'ibeacon':
+                s = Scanner(sensor.name, sensor.topic, sensor.uuid, sensor.away_timeout)
+            elif sensor.type == 'switch':
+                s = Switch(sensor.name, sensor.pin, sensor.topic)
+            elif sensor.type == 'reed':
+                s = ReedSwitch(sensor.name, sensor.pin, sensor.topic, sensor.normally_open, sensor.get('device_type'))
+            elif sensor.type == 'bme280':
+                s = BME280(sensor.name, sensor.topic)
+            elif sensor.type == 'hestiapi':
+                s = HestiaPi(sensor.name, sensor.topic, sensor.heat_setpoint, sensor.cool_setpoint, dry_run=args.dry_run)
+            elif sensor.type == 'onewire':
+                s = OneWire(sensor.name, sensor.topic)
+            else:
+                logging.warn('Sensor {} found in config, but was not setup.'.format(sensor.name))
+            if s:
+                sensor_list.append(s)
 
-    for sensor in config.sensors:
-        s = None
-        if sensor.type == 'dht22':
-            s = DHT(sensor.pin, sensor.topic, sensor.name, 'sensor', sensor.type)
-        elif sensor.type == 'ibeacon':
-            s = Scanner(sensor.name, sensor.topic, sensor.uuid, sensor.away_timeout)
-        elif sensor.type == 'switch':
-            s = Switch(sensor.name, sensor.pin, sensor.topic)
-        elif sensor.type == 'reed':
-            s = ReedSwitch(sensor.name, sensor.pin, sensor.topic, sensor.normally_open, sensor.get('device_type'))
-        elif sensor.type == 'bme280':
-            s = BME280(sensor.name, sensor.topic)
-        elif sensor.type == 'hestiapi':
-            s = HestiaPi(sensor.name, sensor.topic, sensor.heat_setpoint, sensor.cool_setpoint, dry_run=args.dry_run)
-        elif sensor.type == 'onewire':
-            s = OneWire(sensor.name, sensor.topic)
-        else:
-            logging.warn('Sensor {} found in config, but was not setup.'.format(sensor.name))
-        if s:
-            sensor_list.append(s)
-
-    try:
-        scanner = BeaconScanner(sensor_list[1].process_ble_update) # TODO update to search sensor list and setup scanner accordingly.
-        scanner.start()
-    except:
-        logging.error("Beacon scanner did not start")
+        try:
+            scanner = BeaconScanner(sensor_list[1].process_ble_update) # TODO update to search sensor list and setup scanner accordingly.
+            scanner.start()
+        except:
+            logging.error("Beacon scanner did not start")
+    else:
+        logging.warn("No sensors defined in {}".format(args.config))
 
     try:
         while True:
@@ -127,7 +127,7 @@ ExecStart={_path}
 WantedBy=multi-user.target
     """.format(username=username, _path=_path)
     # return template
-    with open('/etc/systemd/user/rpi2mqtt.service', 'w') as f:
+    with open('/etc/systemd/system/rpi2mqtt.service', 'w') as f:
         f.write(template)
 
 if __name__ == '__main__':

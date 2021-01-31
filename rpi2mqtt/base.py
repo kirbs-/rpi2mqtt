@@ -1,4 +1,4 @@
-import rpi2mqtt.mqtt as mqtt
+from rpi2mqtt.mqtt import MQTT as mqtt
 import json
 import logging
 from rpi2mqtt.version import __version__

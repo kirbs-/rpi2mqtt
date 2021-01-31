@@ -1,16 +1,16 @@
 import logging
 import sys
-# logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-
 import yaml
 from dotmap import DotMap
-# import os
 import pathlib
-# import pkg_resources
 
 
-# logging.getLogger().setLevel(logging.DEBUG)
 class Config():
+    """Config holder singleton. Use Config.get_instance() in submodules to access. Initial call must include 'filename'.
+
+    Attributes:
+        [type]: [description]
+    """
     _config = None
     _filename = None
 
@@ -18,6 +18,7 @@ class Config():
     def get_instance(cls, filename=None):
         if filename:
             cls._filename = filename
+
         if not cls._config and cls._filename:
             with open(cls._filename, 'r') as f:
                 cls._config = DotMap(yaml.safe_load(f))

@@ -1,17 +1,8 @@
 import RPi.GPIO as GPIO
 from rpi2mqtt.base import Sensor
-import rpi2mqtt.mqtt as mqtt
+from rpi2mqtt.mqtt import MQTT as mqtt
 import json
 import logging
-
-# logging.basicConfig(level=logging.INFO)
-
-
-# class Sensor(object):
-
-#     def __init__(self, pin, topic):
-#         self.pin = pin
-#         self.topic = topic
 
 
 class ReedSwitch(Sensor):

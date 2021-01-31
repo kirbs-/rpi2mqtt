@@ -1,6 +1,6 @@
 from rpi2mqtt.switch import BasicSwitch
 from rpi2mqtt.base import Sensor
-import rpi2mqtt.mqtt as mqtt
+from rpi2mqtt.mqtt import MQTT
 from rpi2mqtt.temperature import BME280
 import RPi.GPIO as GPIO
 import pendulum
@@ -430,11 +430,22 @@ class HestiaPi(Sensor):
             raise HvacException('{} is not a valid boost value. allowed values are [[{},{}]'.format(boost, HVAC.ON, HVAC.OFF))
         # self._boosting_heat = boost
     
+    def mqtt_ping(self, topic, callback):
+        logging.debug("Checing subcription status on topic {}".format(topic))
+        response = mqtt.publish(topic, "ping")
+        if response != 'pong':
+            logging.warn("Not subscribed to topic {}. Resubscribing...".format(topic))
+            mqtt.subscribe(topic, callback)
 
+    """
+    MQTT subscription callbacks
+    """
+    @MQTT.pongable
     def mqtt_set_temperature_set_point_callback(self, client, userdata, message):
         try:
+            payload = message.payload.decode()
             logging.info("Received temperature set point update request: {}".format(message.payload))
-            payload = float(message.payload.decode())
+            payload = float(payload)
             if self.mode == HVAC.HEAT:
                 self.set_point_heat = payload
             else:
@@ -442,8 +453,9 @@ class HestiaPi(Sensor):
         except Exception as e:
             logging.error('Unable to proces message.', e)
 
-        mqtt.publish(self.topic, self.payload())
+        MQTT.publish(self.topic, self.payload())
 
+    @MQTT.pongable
     def mqtt_set_fan_state_callback(self, client, userdata, message):
         try:
             payload = message.payload.decode().lower()
@@ -452,8 +464,9 @@ class HestiaPi(Sensor):
         except Exception as e:
             logging.error('Unable to proces message.', e)
 
-        mqtt.publish(self.topic, self.payload())
+        MQTT.publish(self.topic, self.payload())
 
+    @MQTT.pongable
     def mqtt_set_mode_callback(self, client, userdata, message):
         try:
             payload = message.payload.decode().lower()
@@ -462,18 +475,18 @@ class HestiaPi(Sensor):
         except Exception as e:
             logging.error('Unable to proces message.', e)
 
-        mqtt.publish(self.topic, self.payload())
+        MQTT.publish(self.topic, self.payload())
 
+    @MQTT.pongable
     def mqtt_set_aux_mode_callback(self, client, userdata, message):
         try:
             payload = message.payload.decode().lower()
             logging.info("Received aux mode update request: {}".format(payload))
-            # self.mode(payload)
             self.boost_heat(payload)
         except Exception as e:
             logging.error('Unable to proces message.', e)
 
-        mqtt.publish(self.topic, self.payload())
+        MQTT.publish(self.topic, self.payload())
 
 
 

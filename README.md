@@ -1,20 +1,24 @@
 # rpi2mqtt
-Simplify reading Raspberry PI GPIO sensors and publish results to MQTT. 
+Simplify interacting sensors and GPIO pins with Raspberry PI via MQTT. Also integrates with Home Assistant. 
  
-# Installation
-1. `git clone https://github.com/kirbs-/rpi2mqtt`
-2. `sudo make`
-3. `sudo make install`
-4. update config.yaml
-5. `sudo systemctl enable rpi2mqtt`
-6. `sudo systemctl start rpi2mqtt`
-
-# Supported Sensors
-- Temperature
+# Supported Devices
+- Temperature/Humidity
     - DHT22/DHT11
-    - DS18B20
+    - One wire (DS18B20, MAX31850, etc)
+    - BME280
 - Binary
     - Generic reed switches
+- Thermostat
+    - HestiaPi
+- Switch GPIO pins on/off. e.g. activate relay, LED, etc.
+
+# Installation
+1. `sudo pip install rpi2mqtt`
+2. `rpi2mqtt --generate-config`
+3. Update config.yaml. See configuration info.
+4. `rpi2mqtt --install-service`
+5. `sudo systemctl enable rpi2mqtt`
+6. `sudo systemctl start rpi2mqtt`
     
 
 # Setup MQTT

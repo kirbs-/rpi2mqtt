@@ -1,11 +1,9 @@
 from rpi2mqtt.base import Sensor
-import rpi2mqtt.mqtt as mqtt
+from rpi2mqtt.mqtt import MQTT as mqtt
 import json
 from datetime import datetime, timedelta
 import RPi.GPIO as g
 import logging
-
-# logging.basicConfig(level=logging.INFO)
 
 
 class BasicSwitch(Sensor):
@@ -85,6 +83,7 @@ class BasicSwitch(Sensor):
 
     def publish_mqtt_discovery(self):
         pass
+
 
 
 
@@ -174,7 +173,7 @@ class Switch(Sensor):
 
     # def callback(self, *args):
     #     mqtt.publish(self.topic, self.payload())
-
+    @mqtt.pongable
     def mqtt_callback(self, client, userdata, message):
         try:
             # print(message)
@@ -188,3 +187,5 @@ class Switch(Sensor):
             logging.error('Unable to proces message.', e)
 
         mqtt.publish(self.topic, self.payload())
+
+    

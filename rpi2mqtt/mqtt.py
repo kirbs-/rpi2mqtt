@@ -66,4 +66,26 @@ class MQTT():
         res = cls.client.subscribe(topic)
         logging.info('Subscription result = {}'.format(res))
         cls.client.message_callback_add(topic, callback)
+        cls.subscribed_topics[topic] = callback
         return res
+
+    @classmethod
+    def ping_subscriptions(cls):
+        for topic, callback in cls.subscribed_topics.items():
+            logging.debug("Checing subcription status on topic {}".format(topic))
+            response = mqtt.publish(topic, "ping")
+            if response != 'pong':
+                logging.warn("Not subscribed to topic {}. Resubscribing...".format(topic))
+                mqtt.subscribe(topic, callback)
+
+    @staticmethod
+    def pongable(func):
+        # def decorator_wrapper(func):
+        def wrapper(client, userdata, message):
+            payload = message.payload.decode()
+            if payload == 'ping':
+                MQTT.publish(message.topic, "pong") 
+                return
+            return func(client, userdata, message)
+        return wrapper
+        # return decorator_wrapper
