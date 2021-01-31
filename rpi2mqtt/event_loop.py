@@ -102,6 +102,7 @@ def main():
             for sensor in sensor_list:
                 sensor.callback()
 
+            MQTT.ping_subscriptions()
             time.sleep(config.polling_interval)
 
     except:
