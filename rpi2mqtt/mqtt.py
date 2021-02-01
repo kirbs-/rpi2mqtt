@@ -8,6 +8,15 @@ import logging
 
 
 # logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+
+
+def on_message(mqttc, obj, msg):
+    logging.info("Recieved: " + msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
+
+
+def on_subscribe(mqttc, obj, mid, granted_qos):
+    logging.info("Subscribed to " + str(mid) + " " + str(granted_qos))
+
 class MQTT():
     
     client = None
@@ -49,16 +58,10 @@ class MQTT():
 
         cls.client.loop_start()
 
-        cls.client.on_subscribe = MQTT.on_subscribe
-        cls.client.on_message = MQTT.on_message
+        cls.client.on_subscribe = on_subscribe
+        cls.client.on_message = on_message
 
-    @staticmethod
-    def on_message(mqttc, obj, msg):
-        logging.info("Recieved: " + msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
 
-    @staticmethod
-    def on_subscribe(mqttc, obj, mid, granted_qos):
-        logging.info("Subscribed to " + str(mid) + " " + str(granted_qos))
 
     @classmethod
     def subscribe(cls, topic, callback):
