@@ -1,4 +1,4 @@
-import paho.mqtt.publish as mqtt
+import paho.mqtt.publish as _mqtt
 # import paho.mqtt.subscribe as mqtt_sub
 from paho.mqtt.client import Client
 from rpi2mqtt.config import Config
@@ -19,7 +19,7 @@ class MQTT():
         try:
             logging.info("Pushlishing to topic {}: | attempt: {} | message: {}".format(topic, cnt, payload))
             if cnt <= cls.config.mqtt.retries:
-                mqtt.single(topic, payload, 
+                _mqtt.single(topic, payload, 
                             hostname=cls.config.mqtt.host, 
                             port=cls.config.mqtt.port,
                             auth={'username': cls.config.mqtt.username, 'password': cls.config.mqtt.password},
@@ -73,10 +73,10 @@ class MQTT():
     def ping_subscriptions(cls):
         for topic, callback in cls.subscribed_topics.items():
             logging.debug("Checing subcription status on topic {}".format(topic))
-            response = mqtt.publish(topic, "ping")
+            response = MQTT.publish(topic, "ping")
             if response != 'pong':
                 logging.warn("Not subscribed to topic {}. Resubscribing...".format(topic))
-                mqtt.subscribe(topic, callback)
+                MQTT.subscribe(topic, callback)
 
     @staticmethod
     def pongable(func):
