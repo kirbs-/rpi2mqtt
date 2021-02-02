@@ -4,7 +4,6 @@ import traceback
 import argparse
 import subprocess
 import sys
-# logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(asctime)s:%(levelname)s:%(message)s')
 
 from rpi2mqtt.config import Config
 from rpi2mqtt.binary import *

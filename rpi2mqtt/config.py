@@ -3,6 +3,7 @@ import sys
 import yaml
 from dotmap import DotMap
 import pathlib
+logging.basicConfig(stream=sys.stdout, format='%(asctime)s:%(levelname)s:%(message)s')
 
 
 class Config():
@@ -29,14 +30,14 @@ class Config():
 
     @staticmethod
     def set_log_level(level):
-        level = logging.WARN
+        _level = logging.WARN
         if level == 'info':
-            level = logging.INFO
+            _level = logging.INFO
         elif level == 'debug':
-            level = logging.DEBUG
+            _level = logging.DEBUG
         elif level == 'error':
-            level = logging.ERROR
-        logging.basicConfig(level=level, stream=sys.stdout)
+            _level = logging.ERROR
+        logger = logging.getLogger().setLevel(_level)
 
 
 def generate_config(config_filename):
