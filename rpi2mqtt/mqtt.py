@@ -5,6 +5,7 @@ from rpi2mqtt.config import Config
 # import traceback
 import logging
 # import sys
+import pendulum
 
 
 # logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
@@ -17,6 +18,14 @@ def on_message(mqttc, obj, msg):
 def on_subscribe(mqttc, obj, mid, granted_qos):
     logging.info("Subscribed to " + str(mid) + " " + str(granted_qos))
 
+
+class Subscription():
+    def __init__(self, topic, callback):
+        self.topic = topic
+        self.callback = callback
+        self.last_ping = None
+
+
 class MQTT():
     
     client = None
@@ -28,6 +37,9 @@ class MQTT():
         try:
             logging.info("Pushlishing to topic {}: | attempt: {} | message: {}".format(topic, cnt, payload))
             if cnt <= cls.config.mqtt.retries:
+                if payload == 'pong':
+                    cls.subscribed_topics[topic].last_ping = pendulum.now()
+
                 _mqtt.single(topic, payload, 
                             hostname=cls.config.mqtt.host, 
                             port=cls.config.mqtt.port,
@@ -69,17 +81,18 @@ class MQTT():
         res = cls.client.subscribe(topic)
         logging.info('Subscription result = {}'.format(res))
         cls.client.message_callback_add(topic, callback)
-        cls.subscribed_topics[topic] = callback
+        cls.subscribed_topics[topic] = Subscription(topic, callback)
         return res
 
     @classmethod
     def ping_subscriptions(cls):
-        for topic, callback in cls.subscribed_topics.items():
+        for topic, sub in cls.subscribed_topics.items():
             logging.debug("Checing subcription status on topic {}".format(topic))
             response = MQTT.publish(topic, "ping")
-            if response != 'pong':
+            last_seen = pendulum.now() - cls.subscribed_topics[topic].last_seen 
+            if last_seen.seconds > cls.config.polling_interval:
                 logging.warn("Not subscribed to topic {}. Resubscribing...".format(topic))
-                MQTT.subscribe(topic, callback)
+                MQTT.subscribe(topic, sub.callback)
 
     @staticmethod
     def pongable(func):
