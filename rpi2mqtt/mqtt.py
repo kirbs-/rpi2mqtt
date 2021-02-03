@@ -85,7 +85,7 @@ class MQTT():
     def pongable(func):
         # def decorator_wrapper(func):
         def wrapper(self, client, userdata, message):
-            logging.debug('Received message {} on topic {}'.format(message, message.topic))
+            logging.debug('Received message {} on topic {}'.format(message.payload.decode(), message.topic))
             payload = message.payload.decode()
             if payload == 'ping':
                 MQTT.publish(message.topic, "pong") 
