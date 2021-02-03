@@ -177,8 +177,9 @@ class Switch(Sensor):
     def mqtt_callback(self, client, userdata, message):
         try:
             # print(message)
-            logging.info("Received command message: {}".format(message))
-            payload = message.payload
+            # logging.info("Received command message: {}".format(payload))
+            payload = message.payload.decode()
+            logging.info("Received command message: {} on topic ".format(payload, message.topic))
             if payload == 'ON':
                 self.on()
             elif payload == 'OFF':

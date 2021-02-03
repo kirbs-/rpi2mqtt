@@ -90,6 +90,8 @@ class MQTT():
             if payload == 'ping':
                 MQTT.publish(message.topic, "pong") 
                 return
+            elif payload == 'pong':
+                return
             return func(self, client, userdata, message)
         return wrapper
         # return decorator_wrapper
