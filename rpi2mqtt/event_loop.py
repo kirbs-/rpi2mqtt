@@ -101,8 +101,8 @@ def main():
             for sensor in sensor_list:
                 sensor.callback()
 
-            MQTT.ping_subscriptions()
             time.sleep(config.polling_interval)
+            MQTT.ping_subscriptions()
 
     except:
         traceback.print_exc()
