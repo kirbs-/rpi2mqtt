@@ -113,7 +113,7 @@ def main():
             scanner.stop()
 
 
-def install_service(username, _path):
+def install_service(username, _path, config_path):
     template = """[Unit]
 Description=rpi2mqtt Service
 After=network-online.target
