@@ -5,5 +5,6 @@ mqtt:
     # username: mqtt_user
     # password: passworkd
     retries: 3
-
+log_level: info
+polling_interval: 300
 sensors:

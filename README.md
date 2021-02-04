@@ -1,6 +1,7 @@
 # rpi2mqtt
-Simplify interacting sensors and GPIO pins with Raspberry PI via MQTT. Also integrates with Home Assistant. 
+Simplify interacting Raspberry Pi sensors and GPIO pins remotely via MQTT. Also integrates with Home Assistant. 
  
+
 # Supported Devices
 - Temperature/Humidity
     - DHT22/DHT11
@@ -12,16 +13,15 @@ Simplify interacting sensors and GPIO pins with Raspberry PI via MQTT. Also inte
     - HestiaPi
 - Switch GPIO pins on/off. e.g. activate relay, LED, etc.
 
+
 # Installation
 1. `sudo pip install rpi2mqtt`
 2. `rpi2mqtt --generate-config`
 3. Update config.yaml. See configuration info.
-4. `rpi2mqtt --install-service`
-5. `sudo systemctl enable rpi2mqtt`
-6. `sudo systemctl start rpi2mqtt`
     
 
-# Setup MQTT
+# Configuration
+### Setup MQTT
 1. Open config.yaml.
 2. Edit MQTT broker details
 ```yaml
@@ -49,5 +49,12 @@ sensors:
     topic: 'homeassistant/sensor/laundry_room_climate/state'
 ```
 3. Start rpi2mqtt
-`systemctl start rpi2mqtt`
+`rpi2mqtt -c /path/to/config.yaml`
+
+
+### Install systemd service
+4. `rpi2mqtt --install-service` and enter run user and absolute path to config.yaml
+5. Enable and start service `sudo systemctl enable rpi2mqtt`
+6. `sudo systemctl start rpi2mqtt`
+
 
