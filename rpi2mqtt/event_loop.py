@@ -44,11 +44,14 @@ def main():
         Config.generate_config('config.yaml')
         sys.exit(0)
 
-    if args.install_service:
+    if args.install_service and args.config:
         username = input("User to run service as [pi]: ") or 'pi'
         # _path = input("Path rpi2mqtt executable (run `which rpi2mqtt`): ")
         _path = subprocess.check_output(['which', 'rpi2mqtt']).decode().strip()
-        install_service(username, _path)
+        install_service(username, _path, args.config)
+        sys.exit(0)
+    elif args.install_service:
+        logging.error("Must specify config location. e.g. -c /full/path/to/config.yaml")
         sys.exit(0)
 
     scanner = None
@@ -121,7 +124,7 @@ After=network-online.target
 # replace user with an existing system user
 Restart=on-failure
 User={username}
-ExecStart={_path}
+ExecStart={_path} -c {config_path}
 
 [Install]
 WantedBy=multi-user.target
