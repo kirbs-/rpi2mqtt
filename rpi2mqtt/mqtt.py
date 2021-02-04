@@ -89,7 +89,7 @@ class MQTT():
         for topic, sub in cls.subscribed_topics.items():
             logging.debug("Checing subcription status on topic {}".format(topic))
             response = MQTT.publish(topic, "ping")
-            last_seen = pendulum.now() - cls.subscribed_topics[topic].last_seen 
+            last_seen = pendulum.now() - cls.subscribed_topics[topic].last_ping
             if last_seen.seconds > cls.config.polling_interval:
                 logging.warn("Not subscribed to topic {}. Resubscribing...".format(topic))
                 MQTT.subscribe(topic, sub.callback)
