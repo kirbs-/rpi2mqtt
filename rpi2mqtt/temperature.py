@@ -215,7 +215,10 @@ class OneWire(Sensor):
             return self.temperature_F
 
     def payload(self):
-        return json.dumps({'temperature': self.state()})
+        return json.dumps({
+            'temperature': self.state(),
+            'state': self.state()
+        })
     
     @property
     def temperature_F(self):
