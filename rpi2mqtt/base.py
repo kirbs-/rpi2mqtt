@@ -20,7 +20,7 @@ GPIO.setmode(GPIO.BCM)
 
 class Sensor(object):
 
-    BINARY_SENSORS = ['reed']
+    BINARY_SENSORS = ['reed', 'binary_sensor']
 
     def __init__(self, name, pin, topic, device_class, device_model, **kwargs):
         self.name = name

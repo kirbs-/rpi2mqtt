@@ -62,3 +62,16 @@ class ReedSwitch(Sensor):
 
     def callback(self, *args):
         mqtt.publish(self.topic, self.payload())
+
+
+class BinarySensor(Sensor):
+
+    def __init__(self, name, pin, topic ):
+        super(BinarySensor, self).__init__(name, pin, topic, None, 'binary')
+        self.setup()
+
+    def setup(self):
+        pass
+
+    def state(self):
+        pass

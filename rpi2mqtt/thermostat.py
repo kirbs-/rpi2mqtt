@@ -21,7 +21,7 @@ class HVAC(object):
         'off': [],
         'fan': [HEAT_PUMP['fan']],
         'heat': [HEAT_PUMP['fan'], HEAT_PUMP['compressor']],
-        'cool': [HEAT_PUMP['fan'], HEAT_PUMP['compressor'], HEAT_PUMP['reversing_valve']],
+        'cool': [HEAT_PUMP['reversing_valve'], HEAT_PUMP['fan'], HEAT_PUMP['compressor']],
         'aux': [HEAT_PUMP['fan'], HEAT_PUMP['compressor'], HEAT_PUMP['aux']],
         'boost': [HEAT_PUMP['aux']],
         'emergency': [HEAT_PUMP['fan'], HEAT_PUMP['aux']],
