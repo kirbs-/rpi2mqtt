@@ -4,6 +4,7 @@ import traceback
 import argparse
 import subprocess
 import sys
+import schedule
 
 from rpi2mqtt.config import Config
 from rpi2mqtt.binary import *
@@ -96,6 +97,8 @@ def main():
     else:
         logging.warn("No sensors defined in {}".format(args.config))
 
+    schedule.every().day.at("01:00").do(MQTT.redo_subscriptions)
+
     try:
         while True:
 
@@ -104,6 +107,7 @@ def main():
 
             time.sleep(config.polling_interval)
             MQTT.ping_subscriptions()
+            schedule.run_pending()
 
     except:
         traceback.print_exc()
@@ -128,7 +132,7 @@ ExecStart={_path} -c {config_path}
 WantedBy=multi-user.target
     """.format(username=username, _path=_path, config_path=config_path)
     # return template
-    with open('/etc/systemd/system/rpi2mqtt.service', 'w') as f:
+    with open('~/.config/systemd/user/rpi2mqtt.service', 'w') as f:
         f.write(template)
 
 if __name__ == '__main__':

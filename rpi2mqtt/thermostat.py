@@ -1,4 +1,4 @@
-from rpi2mqtt.switch import BasicSwitch
+from rpi2mqtt.switch import BasicSwitch, Switch
 from rpi2mqtt.base import Sensor
 from rpi2mqtt.mqtt import MQTT
 from rpi2mqtt.temperature import BME280
@@ -79,12 +79,14 @@ class HestiaPi(Sensor):
         # save boost state
         self._boosting_heat = HVAC.OFF
         self._boosting_start_time = None
+        self._boosting_switch = None
 
         self.setup()
 
     def setup(self):
         logging.debug('Setting up HestiaPi')
         self.bme280 = BME280(self.name, self.topic)
+        self._boosting_switch = HVACAuxSwitch(self.name, None, self.topic)
 
         for mode, pins in HVAC.HEAT_PUMP_MODES.items():
             switch = BasicSwitch(self.name, pins, '{}_{}'.format(self.topic, mode), mode)
@@ -97,10 +99,10 @@ class HestiaPi(Sensor):
             GPIO.setup(pin, GPIO.IN)
 
         # Subscribe to MQTT command topics
-        mqtt.subscribe(self.mode_command_topic, self.mqtt_set_mode_callback)
-        mqtt.subscribe(self.temperature_set_point_command_topic, self.mqtt_set_temperature_set_point_callback)
-        mqtt.subscribe(self.fan_command_topic, self.mqtt_set_fan_state_callback)
-        mqtt.subscribe(self.aux_command_topic, self.mqtt_set_aux_mode_callback)
+        MQTT.subscribe(self.mode_command_topic, self.mqtt_set_mode_callback)
+        MQTT.subscribe(self.temperature_set_point_command_topic, self.mqtt_set_temperature_set_point_callback)
+        MQTT.subscribe(self.fan_command_topic, self.mqtt_set_fan_state_callback)
+        MQTT.subscribe(self.aux_command_topic, self.mqtt_set_aux_mode_callback)
 
     @property
     def mode_command_topic(self):
@@ -341,7 +343,7 @@ class HestiaPi(Sensor):
                 self.on()
             # system is inactive, should we turn it on?
         # logging.info('HVAC is {}. Mode is {}. Temperature is {}.'.format(self.active, self.mode, self.temperature))
-        mqtt.publish(self.topic, self.payload())
+        MQTT.publish(self.topic, self.payload())
 
     # def mode_is_changeable(self):
     #     """Can thermostat active mode be chagned?"""
@@ -416,26 +418,29 @@ class HestiaPi(Sensor):
     def boost_heat(self, boost):
         # manually switching to AUX heat since we don't want to trigger state or mode safety checks.
         # self.mode = HVAC.AUX
-        if boost == HVAC.ON:
-            self.heat_boost_on()
-            self._boosting_start_time = pendulum.now()
-            # self._boosting_heat = HVAC.ON
-        elif boost == HVAC.OFF:
-            self.heat_boost_off()
-            # reset boost metadata
-            self._boosting_start_time = None
-            # self.temperature_history = []
-            # self._boosting_heat = HVAC.OFF
-        else:
-            raise HvacException('{} is not a valid boost value. allowed values are [[{},{}]'.format(boost, HVAC.ON, HVAC.OFF))
+        if self._boosting_switch.state == HVAC.ON:
+            if boost == HVAC.ON:
+                self.heat_boost_on()
+                self._boosting_start_time = pendulum.now()
+                # self._boosting_heat = HVAC.ON
+            elif boost == HVAC.OFF:
+                self.heat_boost_off()
+                # reset boost metadata
+                self._boosting_start_time = None
+                # self.temperature_history = []
+                # self._boosting_heat = HVAC.OFF
+            else:
+                raise HvacException('{} is not a valid boost value. allowed values are [[{},{}]'.format(boost, HVAC.ON, HVAC.OFF))
         # self._boosting_heat = boost
+        else:
+            logging.info("Boosting disabled by switch.")
     
     def mqtt_ping(self, topic, callback):
         logging.debug("Checing subcription status on topic {}".format(topic))
-        response = mqtt.publish(topic, "ping")
+        response = MQTT.publish(topic, "ping")
         if response != 'pong':
             logging.warn("Not subscribed to topic {}. Resubscribing...".format(topic))
-            mqtt.subscribe(topic, callback)
+            MQTT.subscribe(topic, callback)
 
     """
     MQTT subscription callbacks
@@ -489,5 +494,26 @@ class HestiaPi(Sensor):
         MQTT.publish(self.topic, self.payload())
 
 
+class HVACAuxSwitch(Switch):
 
+    def __init__(self, name, pin, topic, device_class='switch', device_type='generic_switch'):
+        super().__init__(name, pin, topic, device_class, device_type)
+
+    def setup(self, lazy_setup=True):
+        # return super().setup(lazy_setup)
+        # don't need any setup
+        self.on()
+
+    def setup_output(self):
+        # don't need to setup GPIO
+        pass
+
+    def on(self):
+        self.power_state = HVAC.ON
+
+    def off(self):
+        self.power_state = HVAC.OFF
+
+    def state(self):
+        return self.power_state
     

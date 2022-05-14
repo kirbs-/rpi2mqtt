@@ -94,6 +94,12 @@ class MQTT():
                 logging.warn("Not subscribed to topic {}. Resubscribing...".format(topic))
                 MQTT.subscribe(topic, sub.callback)
 
+    @classmethod
+    def redo_subscriptions(cls):
+        for topic, sub in cls.subscribed_topics.items():
+            MQTT.client.unsubscribe(topic)
+            MQTT.subscribe(*sub)
+
     @staticmethod
     def pongable(func):
         # def decorator_wrapper(func):

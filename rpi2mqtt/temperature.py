@@ -190,8 +190,11 @@ class OneWire(Sensor):
     """Must enable one wire interface on Raspberry Pi and load modprobe w1-gpio and w1-therm drivers."""
     BASE_DIR = '/sys/bus/w1/devices/'
     # These tow lines mount the device:
-    os.system('modprobe w1-gpio')
-    os.system('modprobe w1-therm')
+    try:
+        os.system('modprobe w1-gpio')
+        os.system('modprobe w1-therm')
+    except:
+        logging.warn('Unable to load w1-gpio and w1-therm.')
 
     TEMP_REGEX = re.compile('.*? t=(\d*)')
 
