@@ -2,6 +2,7 @@ from rpi2mqtt.switch import BasicSwitch, Switch
 from rpi2mqtt.base import Sensor
 from rpi2mqtt.mqtt import MQTT
 from rpi2mqtt.temperature import BME280
+from rpi2mqtt.config import Config
 import RPi.GPIO as GPIO
 import pendulum
 import logging
@@ -357,6 +358,7 @@ class HestiaPi(Sensor):
         if mode in HVAC.HEAT_PUMP_MODES:
             self.mode = mode
             self.last_mode_change_time = pendulum.now()
+            Config.save()
         else:
             raise HvacException('{} mode is not a valid HVAC mode'.format(mode))
 
@@ -455,6 +457,7 @@ class HestiaPi(Sensor):
                 self.set_point_heat = payload
             else:
                 self.set_point_cool = payload
+            Config.save()
         except Exception as e:
             logging.error('Unable to proces message.', e)
 

@@ -39,6 +39,11 @@ class Config():
             _level = logging.ERROR
         logger = logging.getLogger().setLevel(_level)
 
+    @staticmethod
+    def save(cls):
+        logging.info("Saving config file...")
+        yaml.dump(cls._config, cls._filename)
+
 
 def generate_config(config_filename):
     with open(config_filename, 'w') as f: 
