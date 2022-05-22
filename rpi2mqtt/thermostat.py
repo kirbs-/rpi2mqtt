@@ -8,6 +8,7 @@ import pendulum
 import logging
 import json
 import rpi2mqtt.math as math
+import time
 
 
 class HVAC(object):
@@ -22,6 +23,7 @@ class HVAC(object):
         'off': [],
         'fan': [HEAT_PUMP['fan']],
         'heat': [HEAT_PUMP['fan'], HEAT_PUMP['compressor']],
+        '_cool': [HEAT_PUMP['reversing_valve']],
         'cool': [HEAT_PUMP['reversing_valve'], HEAT_PUMP['fan'], HEAT_PUMP['compressor']],
         'aux': [HEAT_PUMP['fan'], HEAT_PUMP['compressor'], HEAT_PUMP['aux']],
         'boost': [HEAT_PUMP['aux']],
@@ -161,6 +163,12 @@ class HestiaPi(Sensor):
             if state == HVAC.ON:
                 if mode not in [HVAC.FAN, HVAC.BOOST]:
                     self.active_start_time = pendulum.now()
+
+                if mode == HVAC.COOL:
+                    # let reversing valve turn on before cooling starts
+                    self._modes['_cool'].on()
+                    time.sleep(5)
+                
                 self._modes[mode].on()
 
                 # confirm mode change

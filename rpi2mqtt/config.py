@@ -42,7 +42,8 @@ class Config():
     @classmethod
     def save(cls):
         logging.info("Saving config file...")
-        yaml.dump(cls._config, cls._filename)
+        with open(cls._filename, 'w') as f:
+            yaml.dump(cls._config, f)
 
 
 def generate_config(config_filename):
