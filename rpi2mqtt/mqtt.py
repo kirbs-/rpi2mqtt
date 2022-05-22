@@ -95,10 +95,10 @@ class MQTT():
                 MQTT.subscribe(topic, sub.callback)
 
     @classmethod
-    def redo_subscriptions(cls):
+    def refresh_subscriptions(cls):
         for topic, sub in cls.subscribed_topics.items():
             MQTT.client.unsubscribe(topic)
-            MQTT.subscribe(*sub)
+            MQTT.subscribe(sub.topic, sub.callback)
 
     @staticmethod
     def pongable(func):

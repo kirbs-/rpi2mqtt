@@ -36,6 +36,10 @@ parser.add_argument('--install-service',
                 help='Install rpi2mqtt as systemd service.',
                 action='store_true')
 
+parser.add_argument('--install-user-service',
+                help='Install rpi2mqtt as user systemd service.',
+                action='store_true')
+
 
 def main():
     config = None
@@ -50,7 +54,15 @@ def main():
         config_path = input("Enter full path to config.yaml: ")
         # _path = input("Path rpi2mqtt executable (run `which rpi2mqtt`): ")
         _path = subprocess.check_output(['which', 'rpi2mqtt']).decode().strip()
-        install_service(username, _path, config_path)
+        install_service(username, _path, config_path, 'system')
+        sys.exit(0)
+
+    if args.install_user_service:
+        username = input("User to run service as [pi]: ") or 'pi'
+        config_path = input("Enter full path to config.yaml: ")
+        # _path = input("Path rpi2mqtt executable (run `which rpi2mqtt`): ")
+        _path = subprocess.check_output(['which', 'rpi2mqtt']).decode().strip()
+        install_service(username, _path, config_path, 'user')
         sys.exit(0)
 
     scanner = None
@@ -97,7 +109,7 @@ def main():
     else:
         logging.warn("No sensors defined in {}".format(args.config))
 
-    schedule.every().day.at("01:00").do(MQTT.redo_subscriptions)
+    schedule.every().day.at("01:00").do(MQTT.refresh_subscriptions)
 
     try:
         while True:
@@ -117,7 +129,7 @@ def main():
             scanner.stop()
 
 
-def install_service(username, _path, config_path):
+def install_service(username, _path, config_path, _type):
     template = """[Unit]
 Description=rpi2mqtt Service
 After=network-online.target
@@ -132,7 +144,12 @@ ExecStart={_path} -c {config_path}
 WantedBy=multi-user.target
     """.format(username=username, _path=_path, config_path=config_path)
     # return template
-    with open('~/.config/systemd/user/rpi2mqtt.service', 'w') as f:
+    if _type == 'user':
+        filename = '~/.config/systemd/user/rpi2mqtt.service'
+    else:
+        filename = '/etc/systemd/system/rpi2mqtt.service'
+
+    with open(filename, 'w') as f:
         f.write(template)
 
 if __name__ == '__main__':

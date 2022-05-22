@@ -39,7 +39,7 @@ class Config():
             _level = logging.ERROR
         logger = logging.getLogger().setLevel(_level)
 
-    @staticmethod
+    @classmethod
     def save(cls):
         logging.info("Saving config file...")
         yaml.dump(cls._config, cls._filename)
