@@ -24,7 +24,7 @@ class HVAC(object):
         'fan': [HEAT_PUMP['fan']],
         'heat': [HEAT_PUMP['fan'], HEAT_PUMP['compressor']],
         '_cool': [HEAT_PUMP['reversing_valve']],
-        'cool': [HEAT_PUMP['reversing_valve'], HEAT_PUMP['fan'], HEAT_PUMP['compressor']],
+        'cool': [HEAT_PUMP['fan'], HEAT_PUMP['compressor']],
         'aux': [HEAT_PUMP['fan'], HEAT_PUMP['compressor'], HEAT_PUMP['aux']],
         'boost': [HEAT_PUMP['aux']],
         'emergency': [HEAT_PUMP['fan'], HEAT_PUMP['aux']],
@@ -164,13 +164,13 @@ class HestiaPi(Sensor):
                 if mode not in [HVAC.FAN, HVAC.BOOST]:
                     self.active_start_time = pendulum.now()
 
-                if mode == HVAC.COOL:
-                    # let reversing valve turn on before cooling starts
-                    self._modes['_cool'].on()
-                    time.sleep(5)
-                
                 self._modes[mode].on()
 
+                if mode == HVAC.COOL:
+                    # delay reversing valve turn on before cooling starts
+                    time.sleep(15)
+                    self._modes['_cool'].on()
+                    
                 # confirm mode change
                 if mode == self.hvac_state: # TODO if boosting then only check boosting pin is active
                     logging.debug('Turned {} {}.'.format(mode, state))
