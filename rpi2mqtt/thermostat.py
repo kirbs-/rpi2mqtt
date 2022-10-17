@@ -75,7 +75,7 @@ class HestiaPi(Sensor):
         # container to store temperature history
         self.temperature_history = []
         # Minimum temperature rate of change over 4 measurements
-        self.minimum_temp_rate_of_change = .05
+        self.minimum_temp_rate_of_change = -0.25
         # super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
         # put thermostat into test mode. i.e. don't trigger HVAC commands
         self.dry_run = kwargs.get('dry_run')
@@ -290,7 +290,7 @@ class HestiaPi(Sensor):
         if self.active:
             self.temperature_history.append(self.temperature)
             logging.debug('Temperature history = {}'.format(self.temperature_history))
-            if len(self.temperature_history) > 3: # how many readings should we keep track of. 4 is ~20 minutes.
+            if len(self.temperature_history) > 6: # how many readings should we keep track of. 4 is ~20 minutes.
                 self.temperature_history.pop(0)
 
     @property
