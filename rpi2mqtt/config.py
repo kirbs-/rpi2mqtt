@@ -43,7 +43,7 @@ class Config():
     def save(cls):
         logging.info("Saving config file...")
         with open(cls._filename, 'w') as f:
-            yaml.dump(cls._config, f)
+            yaml.dump(cls._config.toDict(), f)
 
 
 def generate_config(config_filename):
