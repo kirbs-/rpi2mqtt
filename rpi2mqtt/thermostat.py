@@ -9,6 +9,7 @@ import logging
 import json
 import rpi2mqtt.math as math
 import time
+from collections import deque
 
 
 class HVAC(object):
@@ -51,7 +52,7 @@ class HvacException(Exception):
 
 class HestiaPi(Sensor):
 
-    def __init__(self, name, topic, heat_setpoint, cool_setpoint, set_point_tolerance=1.0, min_run_time=15, **kwargs):
+    def __init__(self, name, topic, heat_setpoint, cool_setpoint, set_point_tolerance=0.5, min_run_time=15, **kwargs):
         # self._modes = HVAC.HEAT_PUMP_MODES
         super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
         self.mode = 'heat'
@@ -73,7 +74,7 @@ class HestiaPi(Sensor):
         # container to holder mode switches. Do not use directly.
         self._modes = {}
         # container to store temperature history
-        self.temperature_history = []
+        self.temperature_history = deque(maxlen=6)
         # Minimum temperature rate of change over 4 measurements
         self.minimum_temp_rate_of_change = -0.25
         # super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
@@ -287,11 +288,11 @@ class HestiaPi(Sensor):
     def append_tempearture_history(self):
         """Save current temperature in _temperature history and maintain N readings."""
          # if system is active log temperature changes for analysis
-        if self.active:
-            self.temperature_history.append(self.temperature)
-            logging.debug('Temperature history = {}'.format(self.temperature_history))
-            if len(self.temperature_history) > 6: # how many readings should we keep track of. 4 is ~20 minutes.
-                self.temperature_history.pop(0)
+        # if self.active:
+        self.temperature_history.append(self.temperature)
+        logging.debug('Temperature history = {}'.format(self.temperature_history))
+        # if len(self.temperature_history) > 6: # how many readings should we keep track of. 4 is ~20 minutes.
+        #     self.temperature_history.pop(0)
 
     @property
     def temperature_rate_of_change(self):
