@@ -227,7 +227,9 @@ class HestiaPi(Sensor):
     def minutes_since_last_mode_change(self):
         # if self.active:
         if self.last_mode_change_time:
-            return (pendulum.now() - self.last_mode_change_time).in_minutes() 
+            _minutes = (pendulum.now() - self.last_mode_change_time).in_minutes() 
+            logging.info(f'{_minutes} minutes since last mode change.')
+            return _minutes
         else:
             return 1000
 
