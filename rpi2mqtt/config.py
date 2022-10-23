@@ -20,8 +20,10 @@ class SensorConfig:
     # binary sensor options
     normally_open: bool = None
     # hestia pi thermostat options
+    mode: str = None
     heat_setpoint: float = None
     cool_setpoint: float = None
+    aux_enabled: str = None
     set_point_tolerance: float = None
     min_run_time: int = None
     min_trigger_cooldown_time: int = None

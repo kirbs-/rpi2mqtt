@@ -79,7 +79,7 @@ def main():
     MQTT.setup()
 
     sensor_list = []
-    if len(config.sensors) >0:
+    if len(config.sensors) > 0:
         for sensor in config.sensors:
             s = None
             if sensor.type == 'dht22':
@@ -93,7 +93,7 @@ def main():
             elif sensor.type == 'bme280':
                 s = BME280(sensor.name, sensor.topic)
             elif sensor.type == 'hestiapi':
-                s = HestiaPi(sensor.name, sensor.topic, sensor.heat_setpoint, sensor.cool_setpoint, dry_run=args.dry_run)
+                s = HestiaPi(**sensor)
             elif sensor.type == 'onewire':
                 s = OneWire(sensor.name, sensor.topic)
             else:

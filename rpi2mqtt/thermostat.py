@@ -52,45 +52,46 @@ class HvacException(Exception):
 
 class HestiaPi(Sensor):
 
-    def __init__(self, name, topic, heat_setpoint, cool_setpoint, set_point_tolerance=0.5, min_run_time=15, **kwargs):
+    def __init__(self, **kwargs):
         # self._modes = HVAC.HEAT_PUMP_MODES
-        super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
-        self.mode = 'heat'
+        super(HestiaPi, self).__init__(kwargs.get('name'), None, kwargs.get('topic'), 'climate', 'HestiaPi')
+        self.mode = kwargs.get('mode', 'heat')
         # self.active = False
         # self.desired_mode = 'off'
         self.active_start_time = None
-        self.set_point_cool = cool_setpoint
-        self.set_point_heat = heat_setpoint
+        self.set_point_cool = kwargs.get('cool_setpoint', 76)
+        self.set_point_heat = kwargs.get('heat_setpoint', 68)
         # how much wiggle room in temperature reading before starting/stopping HVAC.
         # setting this too low can trigger frequence HVAC cycles.
-        self.set_point_tolerance = set_point_tolerance
+        self.set_point_tolerance = kwargs.get('set_point_tolerance', 0.5)
         # Minimum time HVAC should run (in minutes)
-        self.min_run_time = min_run_time
+        self.min_run_time = kwargs.get('min_run_time', 15)
         # how soon can HVAC be activated again after stopping (in minutes)
-        self.min_trigger_cooldown_time = 15
+        self.min_trigger_cooldown_time = kwargs.get('min_trigger_cooldown_time', 15)
         self.last_mode_change_time = None
         self.last_hvac_state_change_time = None
         self.bme280 = None
         # container to holder mode switches. Do not use directly.
         self._modes = {}
         # container to store temperature history
-        self.temperature_history = deque(maxlen=6)
+        self.temperature_history = deque(maxlen=kwargs.get('temperature_history_period', 6))
         # Minimum temperature rate of change over 4 measurements
-        self.minimum_temp_rate_of_change = -0.25
+        self.minimum_temp_rate_of_change = kwargs.get('minimum_temp_rate_of_change', -0.25)
         # super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
         # put thermostat into test mode. i.e. don't trigger HVAC commands
         self.dry_run = kwargs.get('dry_run')
         # save boost state
         self._boosting_heat = HVAC.OFF
         self._boosting_start_time = None
-        self._boosting_switch = None
+        self._boosting_enabled_switch = None
+        self.aux_enabled = kwargs.get('aux_enabled', HVAC.ON)
 
         self.setup()
 
     def setup(self):
         logging.debug('Setting up HestiaPi')
         self.bme280 = BME280(self.name, self.topic)
-        self._boosting_switch = HVACAuxSwitch(self.name, None, self.topic)
+        self._boosting_enabled_switch = HVACAuxSwitch(self.name, None, self.topic, self.aux_enabled)
 
         for mode, pins in HVAC.HEAT_PUMP_MODES.items():
             switch = BasicSwitch(self.name, pins, '{}_{}'.format(self.topic, mode), mode)
@@ -303,9 +304,11 @@ class HestiaPi(Sensor):
 
     def state(self):
         data = self.bme280.state()
+        aux_enabled_state = self._boosting_enabled_switch.state()
         return {
             'bme280': data,
             'mode': self.mode,
+            'aux_enabled': self.aux_enabled,
             'aux_mode': self._boosting_heat,
             'active_time': self.active_time,
             'aux_active_time': self.boosting_active_time,
@@ -435,7 +438,7 @@ class HestiaPi(Sensor):
     def boost_heat(self, boost):
         # manually switching to AUX heat since we don't want to trigger state or mode safety checks.
         # self.mode = HVAC.AUX
-        if self._boosting_switch.state == HVAC.ON:
+        if self._boosting_enabled_switch.state == HVAC.ON:
             if boost == HVAC.ON:
                 self.heat_boost_on()
                 self._boosting_start_time = pendulum.now()
@@ -514,13 +517,21 @@ class HestiaPi(Sensor):
 
 class HVACAuxSwitch(Switch):
 
-    def __init__(self, name, pin, topic, device_class='switch', device_type='generic_switch'):
+    def __init__(self, name, pin, topic, power_state=HVAC.ON, device_class='switch', device_type='generic_switch'):
         super().__init__(name, pin, topic, device_class, device_type)
+        self.power_state = power_state
+
+    @property
+    def homeassistant_mqtt_config(self):
+        config = super(HVACAuxSwitch, self).homeassistant_mqtt_config
+        config['value_template'] = "{{ value_json.aux_enabled }}"
+        return config
 
     def setup(self, lazy_setup=True):
         # return super().setup(lazy_setup)
         # don't need any setup
-        self.on()
+        MQTT.subscribe(self.homeassistant_mqtt_config['command_topic'], self.mqtt_callback)
+        # self.on()
 
     def setup_output(self):
         # don't need to setup GPIO
