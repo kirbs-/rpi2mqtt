@@ -85,7 +85,7 @@ def main():
             if sensor.type == 'dht22':
                 s = DHT(sensor.pin, sensor.topic, sensor.name, 'sensor', sensor.type)
             elif sensor.type == 'ibeacon':
-                s = Scanner(sensor.name, sensor.topic, sensor.uuid, sensor.away_timeout)
+                s = Scanner(sensor.name, sensor.topic, sensor.beacon_uuid, sensor.beacon_away_timeout)
             elif sensor.type == 'switch':
                 s = Switch(sensor.name, sensor.pin, sensor.topic)
             elif sensor.type == 'reed':
