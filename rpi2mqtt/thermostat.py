@@ -304,7 +304,7 @@ class HestiaPi(Sensor):
 
     def state(self):
         data = self.bme280.state()
-        aux_enabled_state = self._boosting_enabled_switch.state()
+        # aux_enabled_state = self._boosting_enabled_switch.state()
         return {
             'bme280': data,
             'mode': self.mode,
@@ -331,7 +331,15 @@ class HestiaPi(Sensor):
         logging.info('Checking temperature...temp = {}, heat_setpoint = {}, cool_setpoint = {}, set_point_tolerance = {}'.format(self.temperature, self.set_point_heat, self.set_point_cool, self.set_point_tolerance))
         self.append_tempearture_history()
         
-        if self.active:
+        if self.active and self.mode == HVAC.OFF:
+            logging.info('Mode is off, but system is active. Turning HVAC off')
+            self.off()
+
+            # reset mode to normal heat
+            if self._boosting_heat:
+                self.boost_heat(HVAC.OFF)
+
+        elif self.active:
             if self.mode in ['heat', 'aux'] and self.temperature > self.set_point_heat + self.set_point_tolerance:
                 # turn hvac off
                 logging.info('Temperature is {}. Turning heat off.'.format(self.temperature))
