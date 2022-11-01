@@ -65,6 +65,9 @@ class Conf:
     log_level: str
     sensors: list
 
+    def to_dict(self):
+        return asdict(self)
+
 
 class Config():
     """Config holder singleton. Use Config.get_instance() in submodules to access. Initial call must include 'filename'.
