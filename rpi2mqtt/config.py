@@ -5,13 +5,14 @@ import yaml
 import pathlib
 from dataclasses import dataclass, asdict
 # from typing import Optional
+from collections.abc import Mapping
 
 
 logging.basicConfig(stream=sys.stdout, format='%(asctime)s:%(levelname)s:%(message)s')
 
 
 @dataclass
-class SensorConfig:
+class SensorConfig(Mapping):
     type: str
     name: str
     topic: str
@@ -33,6 +34,17 @@ class SensorConfig:
     # ibeacon options
     beacon_uuid: str = None
     beacon_away_timeout: int = None
+
+    # override required Mapping functions
+    def __iter__(self):
+        for k, v in self.__dict__.items():
+            yield k
+
+    def __len__(self):
+        return len(asdict(self))
+
+    def __getitem__(self, item):
+        return asdict(self).get(item)
 
 
 @dataclass
