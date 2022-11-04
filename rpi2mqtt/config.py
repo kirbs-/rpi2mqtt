@@ -126,6 +126,7 @@ class Config():
     @classmethod
     def save(cls):
         logging.info("Saving config file...")
+        logging.debug(cls._config.to_dict())
         with open(cls._filename, 'w') as f:
             yaml.dump(cls._config.to_dict(), f)
 
