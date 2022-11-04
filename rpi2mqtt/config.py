@@ -37,7 +37,7 @@ class SensorConfig(Mapping):
 
     # override required Mapping functions
     def __iter__(self):
-        for k, v in self.__dict__.items():
+        for k, v in {k: v for k,v in self.__dict__.items() if v}.items():
             yield k
 
     def __len__(self):
@@ -66,7 +66,12 @@ class Conf:
     sensors: list
 
     def to_dict(self):
-        return asdict(self)
+        _cfg = asdict(self)
+        sensors = []
+        for sensor in _cfg['sensors']:
+            sensors.append({k:v for k,v in sensor.items() if v})
+        _cfg['sensors'] = sensors
+        return _cfg
 
 
 class Config():
