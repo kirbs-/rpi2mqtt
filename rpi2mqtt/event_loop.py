@@ -80,7 +80,7 @@ def main():
 
     sensor_list = []
     if len(config.sensors) > 0:
-        for sensor in config.sensors:
+        for _, sensor in config.sensors.items():
             s = None
             if sensor.type == 'dht22':
                 s = DHT(sensor.pin, sensor.topic, sensor.name, 'sensor', sensor.type)

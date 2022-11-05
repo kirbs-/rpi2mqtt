@@ -63,13 +63,13 @@ class Conf:
     mqtt: MqttConfig
     polling_interval: int
     log_level: str
-    sensors: list
+    sensors: dict
 
     def update_sensor(self, sensor):
-        _sensor = list(filter(lambda s: s.name == sensor.name, self.sensors))[0]
+        _sensor = self.sensors[sensor.name]
         _keys = list(filter(lambda k: not(k.startswith('_')), _sensor.__dict__.keys()))
         _config = {k: v for k, v in _sensor.__dict__.items() if k in _keys}
-        _sensor = SensorConfig(**_config)
+        self.sensors[sensor.name] = SensorConfig(**_config)
 
     def to_dict(self):
         _cfg = asdict(self)
@@ -133,7 +133,7 @@ class Config():
     def save(cls, **kwargs):
         if kwargs.get('sensor'):
             cls._config.update_sensor(kwargs.get('sensor'))
-            
+
         logging.info("Saving config file...")
         logging.debug(cls._config.to_dict())
         with open(cls._filename, 'w') as f:
