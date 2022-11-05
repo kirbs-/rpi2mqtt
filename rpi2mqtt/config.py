@@ -65,6 +65,12 @@ class Conf:
     log_level: str
     sensors: list
 
+    def update_sensor(self, sensor):
+        _sensor = list(filter(lambda s: s.name == sensor.name, self.sensors))[0]
+        _keys = list(filter(lambda k: not(k.startswith('_')), _sensor.__dict__.keys()))
+        _config = {k: v for k, v in _sensor.__dict__.items() if k in _keys}
+        _sensor = SensorConfig(**_config)
+
     def to_dict(self):
         _cfg = asdict(self)
         sensors = []
@@ -124,7 +130,10 @@ class Config():
         logger = logging.getLogger().setLevel(_level)
 
     @classmethod
-    def save(cls):
+    def save(cls, **kwargs):
+        if kwargs.get('sensor'):
+            cls._config.update_sensor(kwargs.get('sensor'))
+            
         logging.info("Saving config file...")
         logging.debug(cls._config.to_dict())
         with open(cls._filename, 'w') as f:
