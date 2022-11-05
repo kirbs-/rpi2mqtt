@@ -107,7 +107,7 @@ class Config():
     def load(cls, config):
         cls._config = Conf(**config)
         cls._config.mqtt = MqttConfig(**cls._config.mqtt)
-        cls._config.sensors = [SensorConfig(**sensor) for sensor in cls._config.sensors]
+        cls._config.sensors = {sensor.name: SensorConfig(**sensor) for sensor in cls._config.sensors}
 
     @classmethod
     def to_dict(cls):
