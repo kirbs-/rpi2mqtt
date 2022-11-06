@@ -68,8 +68,11 @@ class Conf:
     def update_sensor(self, sensor):
         logging.debug(f'pre update: {self}')
         _sensor = self.sensors[sensor.name]
+        _type = _sensor.type
         _keys = list(filter(lambda k: not(k.startswith('_')), _sensor.__dict__.keys()))
-        _config = {k: v for k, v in _sensor.__dict__.items() if k in _keys}
+        _config = {k: v for k, v in sensor.__dict__.items() if k in _keys}
+        _config['type'] = _type
+        logging.debug(f'Object confg: {_config}')
         self.sensors[sensor.name] = SensorConfig(**_config)
         logging.debug(f'post update: {self}')
 
