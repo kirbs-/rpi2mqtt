@@ -530,9 +530,10 @@ class HestiaPi(Sensor):
 
 class HVACAuxSwitch(Switch):
 
-    def __init__(self, name, pin, topic, power_state=HVAC.ON, device_class='switch', device_type='generic_switch'):
-        super().__init__(name, pin, topic, device_class, device_type)
-        self.power_state = power_state
+    def __init__(self, thermostat):
+        super().__init__(thermostat.name, thermostat.pin, thermostat.topic, 'switch', 'generic_switch')
+        self.thermostat = thermostat
+        # self.power_state = thermostat.aux_enabled
 
     @property
     def homeassistant_mqtt_config(self):
@@ -550,12 +551,18 @@ class HVACAuxSwitch(Switch):
         # don't need to setup GPIO
         pass
 
+    # def mqtt_callback(self, client, userdata, message):
+    #     return super().mqtt_callback(client, userdata, message) # TODO
+
     def on(self):
-        self.power_state = HVAC.ON
+        self.thermostat.aux_enabled = HVAC.ON
 
     def off(self):
-        self.power_state = HVAC.OFF
+        self.thermostat.aux_enabled = HVAC.OFF
 
     def state(self):
-        return self.power_state
+        self.thermostat.aux_enabled
+
+    def payload(self):
+        return self.thermostat.payload()
     
