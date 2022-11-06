@@ -66,15 +66,18 @@ class Conf:
     sensors: dict
 
     def update_sensor(self, sensor):
+        logging.debug(f'pre update: {self}')
         _sensor = self.sensors[sensor.name]
         _keys = list(filter(lambda k: not(k.startswith('_')), _sensor.__dict__.keys()))
         _config = {k: v for k, v in _sensor.__dict__.items() if k in _keys}
         self.sensors[sensor.name] = SensorConfig(**_config)
+        logging.debug(f'post update: {self}')
 
     def to_dict(self):
         _cfg = asdict(self)
         sensors = []
-        for sensor in _cfg['sensors']:
+        logging.debug(_cfg)
+        for _, sensor in _cfg['sensors'].items():
             sensors.append({k:v for k,v in sensor.items() if v})
         _cfg['sensors'] = sensors
         return _cfg
@@ -107,7 +110,7 @@ class Config():
     def load(cls, config):
         cls._config = Conf(**config)
         cls._config.mqtt = MqttConfig(**cls._config.mqtt)
-        cls._config.sensors = {sensor.name: SensorConfig(**sensor) for sensor in cls._config.sensors}
+        cls._config.sensors = {sensor['name']: SensorConfig(**sensor) for sensor in cls._config.sensors}
 
     @classmethod
     def to_dict(cls):

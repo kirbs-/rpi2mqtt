@@ -59,8 +59,8 @@ class HestiaPi(Sensor):
         # self.active = False
         # self.desired_mode = 'off'
         self.active_start_time = None
-        self.set_point_cool = kwargs.get('cool_setpoint', 76)
-        self.set_point_heat = kwargs.get('heat_setpoint', 68)
+        self.cool_setpoint = kwargs.get('cool_setpoint', 76)
+        self.heat_setpoint = kwargs.get('heat_setpoint', 68)
         # how much wiggle room in temperature reading before starting/stopping HVAC.
         # setting this too low can trigger frequence HVAC cycles.
         self.set_point_tolerance = kwargs.get('set_point_tolerance', 0.5)
@@ -243,9 +243,9 @@ class HestiaPi(Sensor):
     @property
     def set_point(self):
         if self.mode == HVAC.HEAT:
-            return self.set_point_heat
+            return self.heat_setpoint
         elif self.mode == HVAC.COOL:
-            return self.set_point_cool
+            return self.cool_setpoint
 
     @property
     def hvac_state(self):
@@ -317,8 +317,8 @@ class HestiaPi(Sensor):
             'active': self.active,
             'hvac_state': self.ha_hvac_state,
             'fan_state': self.fan_state,
-            'heat_setpoint': self.set_point_heat,
-            'cool_setpoint': self.set_point_cool,
+            'heat_setpoint': self.heat_setpoint,
+            'cool_setpoint': self.cool_setpoint,
             'set_point': self.set_point,
             'current_temperature': self.current_temperature,
             'humidity': self._bme280.state()['humidity'],
@@ -330,7 +330,7 @@ class HestiaPi(Sensor):
 
     def callback(self, **kwargs):
         # system active, should we turn it off?
-        logging.info('Checking temperature...temp = {}, heat_setpoint = {}, cool_setpoint = {}, set_point_tolerance = {}'.format(self.temperature, self.set_point_heat, self.set_point_cool, self.set_point_tolerance))
+        logging.info('Checking temperature...temp = {}, heat_setpoint = {}, cool_setpoint = {}, set_point_tolerance = {}'.format(self.temperature, self.heat_setpoint, self.cool_setpoint, self.set_point_tolerance))
         self.append_tempearture_history()
         
         if self.active and self.mode == HVAC.OFF:
@@ -342,7 +342,7 @@ class HestiaPi(Sensor):
                 self.boost_heat(HVAC.OFF)
 
         elif self.active:
-            if self.mode in ['heat', 'aux'] and self.temperature > self.set_point_heat + self.set_point_tolerance:
+            if self.mode in ['heat', 'aux'] and self.temperature > self.heat_setpoint + self.set_point_tolerance:
                 # turn hvac off
                 logging.info('Temperature is {}. Turning heat off.'.format(self.temperature))
                 self.off()
@@ -351,7 +351,7 @@ class HestiaPi(Sensor):
                 if self._boosting_heat:
                     self.boost_heat(HVAC.OFF)
 
-            elif self.mode == 'cool' and self.temperature < self.set_point_cool - self.set_point_tolerance:
+            elif self.mode == 'cool' and self.temperature < self.cool_setpoint - self.set_point_tolerance:
                 # turn hvac off
                 logging.info('Temperature is {}. Turning cool off.'.format(self.temperature))
                 self.off()
@@ -362,11 +362,11 @@ class HestiaPi(Sensor):
                 self.boost_heat(HVAC.ON)
 
         else:
-            if self.mode == 'heat' and self.temperature < self.set_point_heat - self.set_point_tolerance:
+            if self.mode == 'heat' and self.temperature < self.heat_setpoint - self.set_point_tolerance:
                 # turn hvac on
                 logging.info('Temperature is {}. Turning heat on.'.format(self.temperature))
                 self.on()
-            elif self.mode == 'cool' and self.temperature > self.set_point_cool + self.set_point_tolerance:
+            elif self.mode == 'cool' and self.temperature > self.cool_setpoint + self.set_point_tolerance:
                 # turn hvac on
                 logging.info('Temperature is {}. Turning cool on.'.format(self.temperature))
                 self.on()
@@ -482,9 +482,9 @@ class HestiaPi(Sensor):
             logging.info("Received temperature set point update request: {}".format(message.payload))
             payload = float(payload)
             if self.mode == HVAC.HEAT:
-                self.set_point_heat = payload
+                self.heat_setpoint = payload
             else:
-                self.set_point_cool = payload
+                self.cool_setpoint = payload
             Config.save(sensor=self)
         except Exception as e:
             logging.error('Unable to proces message.', e)
