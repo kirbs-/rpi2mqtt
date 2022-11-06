@@ -91,7 +91,7 @@ class HestiaPi(Sensor):
     def setup(self):
         logging.debug('Setting up HestiaPi')
         self._bme280 = BME280(self.name, self.topic)
-        self._boosting_enabled_switch = HVACAuxSwitch(self.name, None, self.topic, self.aux_enabled)
+        self._boosting_enabled_switch = HVACAuxSwitch(self)
 
         for mode, pins in HVAC.HEAT_PUMP_MODES.items():
             switch = BasicSwitch(self.name, pins, '{}_{}'.format(self.topic, mode), mode)
@@ -542,17 +542,12 @@ class HVACAuxSwitch(Switch):
         return config
 
     def setup(self, lazy_setup=True):
-        # return super().setup(lazy_setup)
         # don't need any setup
         MQTT.subscribe(self.homeassistant_mqtt_config['command_topic'], self.mqtt_callback)
-        # self.on()
 
     def setup_output(self):
         # don't need to setup GPIO
         pass
-
-    # def mqtt_callback(self, client, userdata, message):
-    #     return super().mqtt_callback(client, userdata, message) # TODO
 
     def on(self):
         self.thermostat.aux_enabled = HVAC.ON
