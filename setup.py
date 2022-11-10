@@ -17,7 +17,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.3.8',
+    version='0.5.23',
 
     # description='A Jupyter notebook extension to hide code, prompts and outputs.',
     # long_description=long_description,
@@ -79,6 +79,7 @@ setup(
         'RPi.GPIO',
         'pendulum', 
         'poetry',
+        'schedule'
     ],
     entry_points={
         'console_scripts': ['rpi2mqtt=rpi2mqtt.event_loop:main']

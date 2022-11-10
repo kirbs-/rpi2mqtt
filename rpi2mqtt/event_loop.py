@@ -4,6 +4,7 @@ import traceback
 import argparse
 import subprocess
 import sys
+import schedule
 
 from rpi2mqtt.config import Config
 from rpi2mqtt.binary import *
@@ -35,6 +36,10 @@ parser.add_argument('--install-service',
                 help='Install rpi2mqtt as systemd service.',
                 action='store_true')
 
+parser.add_argument('--install-user-service',
+                help='Install rpi2mqtt as user systemd service.',
+                action='store_true')
+
 
 def main():
     config = None
@@ -49,7 +54,15 @@ def main():
         config_path = input("Enter full path to config.yaml: ")
         # _path = input("Path rpi2mqtt executable (run `which rpi2mqtt`): ")
         _path = subprocess.check_output(['which', 'rpi2mqtt']).decode().strip()
-        install_service(username, _path, config_path)
+        install_service(username, _path, config_path, 'system')
+        sys.exit(0)
+
+    if args.install_user_service:
+        username = input("User to run service as [pi]: ") or 'pi'
+        config_path = input("Enter full path to config.yaml: ")
+        # _path = input("Path rpi2mqtt executable (run `which rpi2mqtt`): ")
+        _path = subprocess.check_output(['which', 'rpi2mqtt']).decode().strip()
+        install_service(username, _path, config_path, 'user')
         sys.exit(0)
 
     scanner = None
@@ -66,13 +79,13 @@ def main():
     MQTT.setup()
 
     sensor_list = []
-    if len(config.sensors) >0:
-        for sensor in config.sensors:
+    if len(config.sensors) > 0:
+        for _, sensor in config.sensors.items():
             s = None
             if sensor.type == 'dht22':
                 s = DHT(sensor.pin, sensor.topic, sensor.name, 'sensor', sensor.type)
             elif sensor.type == 'ibeacon':
-                s = Scanner(sensor.name, sensor.topic, sensor.uuid, sensor.away_timeout)
+                s = Scanner(sensor.name, sensor.topic, sensor.beacon_uuid, sensor.beacon_away_timeout)
             elif sensor.type == 'switch':
                 s = Switch(sensor.name, sensor.pin, sensor.topic)
             elif sensor.type == 'reed':
@@ -80,7 +93,7 @@ def main():
             elif sensor.type == 'bme280':
                 s = BME280(sensor.name, sensor.topic)
             elif sensor.type == 'hestiapi':
-                s = HestiaPi(sensor.name, sensor.topic, sensor.heat_setpoint, sensor.cool_setpoint, dry_run=args.dry_run)
+                s = HestiaPi(**sensor)
             elif sensor.type == 'onewire':
                 s = OneWire(sensor.name, sensor.topic)
             else:
@@ -96,6 +109,8 @@ def main():
     else:
         logging.warn("No sensors defined in {}".format(args.config))
 
+    schedule.every().day.at("01:00").do(MQTT.refresh_subscriptions)
+
     try:
         while True:
 
@@ -104,6 +119,7 @@ def main():
 
             time.sleep(config.polling_interval)
             MQTT.ping_subscriptions()
+            schedule.run_pending()
 
     except:
         traceback.print_exc()
@@ -113,7 +129,7 @@ def main():
             scanner.stop()
 
 
-def install_service(username, _path, config_path):
+def install_service(username, _path, config_path, _type):
     template = """[Unit]
 Description=rpi2mqtt Service
 After=network-online.target
@@ -128,7 +144,12 @@ ExecStart={_path} -c {config_path}
 WantedBy=multi-user.target
     """.format(username=username, _path=_path, config_path=config_path)
     # return template
-    with open('/etc/systemd/system/rpi2mqtt.service', 'w') as f:
+    if _type == 'user':
+        filename = '~/.config/systemd/user/rpi2mqtt.service'
+    else:
+        filename = '/etc/systemd/system/rpi2mqtt.service'
+
+    with open(filename, 'w') as f:
         f.write(template)
 
 if __name__ == '__main__':

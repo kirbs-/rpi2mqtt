@@ -1,3 +1,5 @@
+import itertools
+
 def zeros_matrix(rows, cols):
     """
     Creates a matrix filled with zeros.
@@ -67,5 +69,7 @@ def matrix_subtraction(A, B):
     return C
 
 def rate_of_change(series):
-    res = matrix_subtraction([series[1:]], [series[0:-1]])
+    A = list(itertools.islice(series, 1, len(series)))
+    B = list(itertools.islice(series, 0, len(series)-1))
+    res = matrix_subtraction([A], [B])
     return sum(res[0])/len(res[0])
