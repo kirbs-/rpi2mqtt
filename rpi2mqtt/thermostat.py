@@ -556,7 +556,7 @@ class HVACAuxSwitch(Switch):
         self.thermostat.aux_enabled = HVAC.OFF
 
     def state(self):
-        self.thermostat.aux_enabled
+        return self.thermostat.aux_enabled
 
     def payload(self):
         return self.thermostat.payload()
