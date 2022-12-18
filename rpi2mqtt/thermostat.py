@@ -74,7 +74,8 @@ class HestiaPi(Sensor):
         # container to holder mode switches. Do not use directly.
         self._modes = {}
         # container to store temperature history
-        self._temperature_history = deque(maxlen=kwargs.get('temperature_history_period', 6))
+        self._temperature_history_period = kwargs.get('temperature_history_period', 6)
+        self._temperature_history = deque(maxlen=self._temperature_history_period)
         # Minimum temperature rate of change over 4 measurements
         self.minimum_temp_rate_of_change = kwargs.get('minimum_temp_rate_of_change', -0.25)
         # super(HestiaPi, self).__init__(name, None, topic, 'climate', 'HestiaPi')
@@ -183,16 +184,11 @@ class HestiaPi(Sensor):
             elif state == HVAC.OFF:
                 self._modes[mode].off()
                 
-                # if mode == HVAC.COOL:
-                #     time.sleep(3)
-                #     self._modes['_cool'].off()
-
-                if mode not in [HVAC.FAN, HVAC.BOOST]:
-                    self.active_start_time = None
-                    self._temperature_history = []
-
                 # confirm mode change
                 if 'off' == self.hvac_state:
+                    if mode not in [HVAC.FAN, HVAC.BOOST]: # TODO bug when system doesn't deactivate mode 
+                        self.active_start_time = None
+                        self._temperature_history = []
                     logging.debug('Turned {} {}.'.format(mode, state))
                 else:
                     logging.warn('Did not set HVAC state to {}. Try again.'.format(mode))
@@ -299,7 +295,7 @@ class HestiaPi(Sensor):
 
     @property
     def temperature_rate_of_change(self):
-        if len(self._temperature_history) > 1:
+        if len(self._temperature_history) > self._temperature_history_period:
             roc = math.rate_of_change(self._temperature_history)
             logging.debug('Temperature rate of change is {}.'.format(roc))
             return roc
@@ -357,7 +353,7 @@ class HestiaPi(Sensor):
                 self.off()
 
             # should system boost heating with aux heat?
-            logging.debug("Checking temperature rate of change...current rate = {}, min rate = {}".format(self.temperature_rate_of_change, self.minimum_temp_rate_of_change))
+            logging.info("Checking temperature rate of change...current rate = {}, min rate = {}".format(self.temperature_rate_of_change, self.minimum_temp_rate_of_change))
             if self.mode == HVAC.HEAT and self.temperature_rate_of_change and self.temperature_rate_of_change <= self.minimum_temp_rate_of_change:
                 self.boost_heat(HVAC.ON)
 
@@ -398,7 +394,8 @@ class HestiaPi(Sensor):
             logging.warn("System needs to run for atleast {} minutes. Only running for {} minutes.".format(self.min_run_time, self.active_time))
         elif not self.active and self.minutes_since_last_hvac_state_change <= self.min_run_time:
             logging.warn("System needs to idle for atleast {} minutes. Only idle for {} minutes.".format(self.min_run_time, self.minutes_since_last_hvac_state_change))
-        elif self.minutes_since_last_mode_change <= self.min_trigger_cooldown_time:
+        elif self.minutes_since_last_mode_change <= self.min_trigger_cooldown_time and self.mode != HVAC.OFF:
+            # TODO bug here
             logging.warn("Can only change mode every {} minutes. It's been {} minutes since last change.".format(self.min_trigger_cooldown_time, self.minutes_since_last_mode_change))
         # elif self.mode == self.hvac_state:
         #     logging.info('Ignoring mode change since HVAC is alread in {} mode'.format(self.mode))

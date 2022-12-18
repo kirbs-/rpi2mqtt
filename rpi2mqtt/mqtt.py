@@ -35,7 +35,7 @@ class MQTT():
     @classmethod
     def publish(cls, topic, payload, cnt=1):
         try:
-            logging.info("Pushlishing to topic {}: | attempt: {} | message: {}".format(topic, cnt, payload))
+            logging.debug("Pushlishing to topic {}: | attempt: {} | message: {}".format(topic, cnt, payload))
             if cnt <= cls.config.mqtt.retries:
                 if payload == 'pong':
                     cls.subscribed_topics[topic].last_ping = pendulum.now()
@@ -79,7 +79,7 @@ class MQTT():
     def subscribe(cls, topic, callback):
         logging.info("Subscribing to topic %s", topic)
         res = cls.client.subscribe(topic)
-        logging.info('Subscription result = {}'.format(res))
+        logging.debug('Subscription result = {}'.format(res))
         cls.client.message_callback_add(topic, callback)
         cls.subscribed_topics[topic] = Subscription(topic, callback)
         return res
