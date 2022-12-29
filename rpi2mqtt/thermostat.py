@@ -153,7 +153,7 @@ class HestiaPi(Sensor):
                 'temperature_state_template': '{{ value_json.set_point }}',
                 'temperature_command_topic': self.temperature_set_point_command_topic,
                 'aux_state_topic': self.topic,
-                'aux_state_topic': '{{ value_json.aux_mode }}', # TODO refactor aux_mode to aux_state
+                'aux_state_template': '{{ value_json.aux_mode }}', # TODO refactor aux_mode to aux_state
                 'aux_command_topic': self.aux_command_topic,
                 'fan_modes': ['auto', 'high'],
                 'fan_mode_state_topic': self.topic,
@@ -287,15 +287,15 @@ class HestiaPi(Sensor):
     def append_tempearture_history(self):
         """Save current temperature in _temperature history and maintain N readings."""
          # if system is active log temperature changes for analysis
-        # if self.active:
-        self._temperature_history.append(self.temperature)
-        logging.debug('Temperature history = {}'.format(self._temperature_history))
+        if self.active:
+            self._temperature_history.append(self.temperature)
+            logging.debug('Temperature history = {}'.format(self._temperature_history))
         # if len(self.temperature_history) > 6: # how many readings should we keep track of. 4 is ~20 minutes.
         #     self.temperature_history.pop(0)
 
     @property
     def temperature_rate_of_change(self):
-        if len(self._temperature_history) > self._temperature_history_period:
+        if len(self._temperature_history) >= self._temperature_history_period:
             roc = math.rate_of_change(self._temperature_history)
             logging.debug('Temperature rate of change is {}.'.format(roc))
             return roc
@@ -317,6 +317,7 @@ class HestiaPi(Sensor):
             'cool_setpoint': self.cool_setpoint,
             'set_point': self.set_point,
             'current_temperature': self.current_temperature,
+            'temperature': self._bme280.state()['temperature'],
             'humidity': self._bme280.state()['humidity'],
             'pressure': self._bme280.state()['pressure'],
         }
@@ -353,8 +354,8 @@ class HestiaPi(Sensor):
                 self.off()
 
             # should system boost heating with aux heat?
-            logging.info("Checking temperature rate of change...current rate = {}, min rate = {}".format(self.temperature_rate_of_change, self.minimum_temp_rate_of_change))
-            if self.mode == HVAC.HEAT and self.temperature_rate_of_change and self.temperature_rate_of_change <= self.minimum_temp_rate_of_change:
+            logging.info(f"Checking temperature rate of change...current rate = {self.temperature_rate_of_change}, min rate = {self.minimum_temp_rate_of_change}, temperature history {self._temperature_history}")
+            if self.should_boost():
                 self.boost_heat(HVAC.ON)
 
         else:
@@ -382,6 +383,7 @@ class HestiaPi(Sensor):
         if mode in HVAC.HEAT_PUMP_MODES:
             self.mode = mode
             self.last_mode_change_time = pendulum.now()
+            self.callback()
             # Config.save()
         else:
             raise HvacException('{} mode is not a valid HVAC mode'.format(mode))
@@ -413,7 +415,7 @@ class HestiaPi(Sensor):
     def off(self):
         if self._can_change_hvac_state():
             self.set_state(self.mode, HVAC.OFF)
-            self._temperature_history = []
+            self._temperature_history = deque(maxlen=self._temperature_history_period)
         else:
             logging.warn("Did not deactivate {}.".format(self.mode))
 
@@ -445,7 +447,7 @@ class HestiaPi(Sensor):
     def boost_heat(self, boost):
         # manually switching to AUX heat since we don't want to trigger state or mode safety checks.
         # self.mode = HVAC.AUX
-        if self._boosting_enabled_switch.state == HVAC.ON:
+        if self.aux_enabled == HVAC.ON:
             if boost == HVAC.ON:
                 self.heat_boost_on()
                 self._boosting_start_time = pendulum.now()
@@ -460,7 +462,11 @@ class HestiaPi(Sensor):
                 raise HvacException('{} is not a valid boost value. allowed values are [[{},{}]'.format(boost, HVAC.ON, HVAC.OFF))
         # self._boosting_heat = boost
         else:
-            logging.info("Boosting disabled by switch.")
+            logging.info(f"Boosting disabled by switch. Switch state: {self._boosting_enabled_switch.state()}. aux_enabled: {self.aux_enabled}")
+
+    def should_boost(self):
+        if self.mode == HVAC.HEAT and self.temperature_rate_of_change and self.temperature_rate_of_change <= self.minimum_temp_rate_of_change:
+            return True
     
     def mqtt_ping(self, topic, callback):
         logging.debug("Checing subcription status on topic {}".format(topic))
@@ -536,6 +542,8 @@ class HVACAuxSwitch(Switch):
     def homeassistant_mqtt_config(self):
         config = super(HVACAuxSwitch, self).homeassistant_mqtt_config
         config['value_template'] = "{{ value_json.aux_enabled }}"
+        config['command_topic'] = f"{self.topic}/aux_enabled/set"
+        # config['command_topic'] = "/homeassistant/switch/hestiapi_aux_enabled/set"
         return config
 
     def setup(self, lazy_setup=True):
