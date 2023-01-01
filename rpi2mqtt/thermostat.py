@@ -44,6 +44,7 @@ class HVAC(object):
     AUTO = 'auto'
     ON = 'on'
     OFF = 'off'
+    # home assistant MQTT HVAC aux
 
 
 class HvacException(Exception):
@@ -158,7 +159,9 @@ class HestiaPi(Sensor):
                 'fan_modes': ['auto', 'high'],
                 'fan_mode_state_topic': self.topic,
                 'fan_mode_state_template': '{{ value_json.fan_state }}',
-                'fan_mode_command_topic': self.fan_command_topic
+                'fan_mode_command_topic': self.fan_command_topic,
+                'payload_on': HVAC.ON,
+                'payload_off': HVAC.OFF
             }
 
     def set_state(self, mode, state):
