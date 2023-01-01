@@ -42,8 +42,8 @@ class HVAC(object):
     FAN = 'fan'
     FAN_ON = 'high'
     AUTO = 'auto'
-    ON = 'on'
-    OFF = 'off'
+    ON = 'ON'
+    OFF = 'OFF'
     # home assistant MQTT HVAC aux
 
 
@@ -138,8 +138,8 @@ class HestiaPi(Sensor):
                 'unique_id': '{}_{}_{}_rpi2mqtt'.format(self.name, self.device_model, self.device_class),
                 "json_attributes_topic": self.topic,
                 'device': self.device_config,
-                'min_temp': 65,
-                'max_temp': 80,
+                'min_temp': 60,
+                'max_temp': 85,
                 'initial': 72,
                 'modes': ['off', 'auto', 'heat', 'cool', 'aux'],
                 'fan_modes': ['auto','high'],
@@ -197,6 +197,7 @@ class HestiaPi(Sensor):
                     logging.warn('Did not set HVAC state to {}. Try again.'.format(mode))
             else:
                 raise HvacException("State '{}' is not a valid state.".format(state))
+                
         if mode not in [HVAC.FAN, HVAC.BOOST]:
             self.last_hvac_state_change_time = pendulum.now()
 
