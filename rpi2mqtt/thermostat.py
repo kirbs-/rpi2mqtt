@@ -42,9 +42,8 @@ class HVAC(object):
     FAN = 'fan'
     FAN_ON = 'high'
     AUTO = 'auto'
-    ON = 'ON'
-    OFF = 'OFF'
-    # home assistant MQTT HVAC aux
+    ON = 'on'
+    OFF = 'off'
 
 
 class HvacException(Exception):
@@ -138,8 +137,8 @@ class HestiaPi(Sensor):
                 'unique_id': '{}_{}_{}_rpi2mqtt'.format(self.name, self.device_model, self.device_class),
                 "json_attributes_topic": self.topic,
                 'device': self.device_config,
-                'min_temp': 60,
-                'max_temp': 85,
+                'min_temp': 65,
+                'max_temp': 80,
                 'initial': 72,
                 'modes': ['off', 'auto', 'heat', 'cool', 'aux'],
                 'fan_modes': ['auto','high'],
@@ -154,14 +153,12 @@ class HestiaPi(Sensor):
                 'temperature_state_template': '{{ value_json.set_point }}',
                 'temperature_command_topic': self.temperature_set_point_command_topic,
                 'aux_state_topic': self.topic,
-                'aux_state_template': '{{ value_json.aux_mode }}', # TODO refactor aux_mode to aux_state
+                'aux_state_topic': '{{ value_json.aux_mode }}', # TODO refactor aux_mode to aux_state
                 'aux_command_topic': self.aux_command_topic,
                 'fan_modes': ['auto', 'high'],
                 'fan_mode_state_topic': self.topic,
                 'fan_mode_state_template': '{{ value_json.fan_state }}',
-                'fan_mode_command_topic': self.fan_command_topic,
-                'payload_on': HVAC.ON,
-                'payload_off': HVAC.OFF
+                'fan_mode_command_topic': self.fan_command_topic
             }
 
     def set_state(self, mode, state):
@@ -197,7 +194,6 @@ class HestiaPi(Sensor):
                     logging.warn('Did not set HVAC state to {}. Try again.'.format(mode))
             else:
                 raise HvacException("State '{}' is not a valid state.".format(state))
-                
         if mode not in [HVAC.FAN, HVAC.BOOST]:
             self.last_hvac_state_change_time = pendulum.now()
 
@@ -321,7 +317,6 @@ class HestiaPi(Sensor):
             'cool_setpoint': self.cool_setpoint,
             'set_point': self.set_point,
             'current_temperature': self.current_temperature,
-            'temperature': self._bme280.state()['temperature'],
             'humidity': self._bme280.state()['humidity'],
             'pressure': self._bme280.state()['pressure'],
         }
@@ -387,7 +382,6 @@ class HestiaPi(Sensor):
         if mode in HVAC.HEAT_PUMP_MODES:
             self.mode = mode
             self.last_mode_change_time = pendulum.now()
-            self.callback()
             # Config.save()
         else:
             raise HvacException('{} mode is not a valid HVAC mode'.format(mode))
@@ -466,7 +460,7 @@ class HestiaPi(Sensor):
                 raise HvacException('{} is not a valid boost value. allowed values are [[{},{}]'.format(boost, HVAC.ON, HVAC.OFF))
         # self._boosting_heat = boost
         else:
-            logging.info(f"Boosting disabled by switch. Switch state: {self._boosting_enabled_switch.state()}. aux_enabled: {self.aux_enabled}")
+            logging.info(f"Boosting disabled by switch. Switch state: {self._boosting_enabled_switch.state}. aux_enabled: {self.aux_enabled}")
 
     def should_boost(self):
         if self.mode == HVAC.HEAT and self.temperature_rate_of_change and self.temperature_rate_of_change <= self.minimum_temp_rate_of_change:
@@ -546,8 +540,6 @@ class HVACAuxSwitch(Switch):
     def homeassistant_mqtt_config(self):
         config = super(HVACAuxSwitch, self).homeassistant_mqtt_config
         config['value_template'] = "{{ value_json.aux_enabled }}"
-        config['command_topic'] = f"{self.topic}/aux_enabled/set"
-        # config['command_topic'] = "/homeassistant/switch/hestiapi_aux_enabled/set"
         return config
 
     def setup(self, lazy_setup=True):

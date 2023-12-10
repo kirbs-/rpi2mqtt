@@ -111,3 +111,4 @@ rpi2mqtt/config.yaml
 .vscode
 
 *.crt
+.DS_Store

@@ -204,6 +204,13 @@ class OneWire(Sensor):
         self.setup()
         super(OneWire, self).__init__(name, None, topic, 'temperature', 'One wire', **kwargs)
 
+    @property
+    def homeassistant_mqtt_config(self):
+        config = super(OneWire, self).homeassistant_mqtt_config
+        config['value_template'] = "{{ value_json.temperature }}"
+        config['unit_of_measurement'] = '°F'
+        return config
+
     def setup(self):
         for device in glob.glob( OneWire.BASE_DIR + '**/w1_slave'):
             w1_id = device.split('/')[-2]
